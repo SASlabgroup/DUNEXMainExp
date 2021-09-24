@@ -12,7 +12,7 @@ import pynmea2
 import cftime
 
 # Define Project Directory 
-project_dir = '/Volumes/DUNEXdata/DUNEXMainExp_Oct2021/'
+project_dir = '/Volumes/DUNEXdata/DUNEXMainExp/'
 
 # Define Data Directory
 data_dir = 'microSWIFT_data/'
@@ -161,7 +161,7 @@ for microSWIFT_dir in microSWIFT_dir_list:
                         # Create datetime from timestamp and file name
                         # Convert Month string to month num
                         month_str = gps_file[-21:-18]
-                        
+                    
                         # January
                         if month_str == 'Jan':
                             month_num = '01'
