@@ -74,7 +74,7 @@ PASSWORD="1013ne40th"
 record_window_length = datetime.timedelta(hours=1)
 
 # Define project directory
-project_dir = '/Volumes/DUNEXdata/DUNEXMainExp_Oct2021/'
+project_dir = '/Volumes/DUNEXdata/DUNEXMainExp'
 
 # Define Metadata Excel sheet name
 metadata_name = 'DUNEXMainExp_MetaData.xlsx'
@@ -86,11 +86,11 @@ metadata_filename = project_dir + metadata_name
 mission_num = int(input('Enter Mission Number: '))
 
 # Create Data Directory for Mission
-mission_dir_str =  "../mission_{}".format(mission_num)
+mission_dir_str =  project_dir + "/microSWIFT_data/mission_{}".format(mission_num)
 subprocess.run(["mkdir", "-p", mission_dir_str])
 
 # Set up Data Offload Logging file
-log_name = '../mission_{}/data_offload.log'.format(mission_num)
+log_name = mission_dir_str + '/data_offload.log'
 logging.basicConfig(filename=log_name, encoding='utf-8', level=logging.DEBUG)
 logging.info('------------ Mission {} Data Offload ------------'.format(mission_num))
 
@@ -133,7 +133,7 @@ for microSWIFT in microSWIFTs_deployed:
         logging.info('microSWIFT {} is online'.format(microSWIFT))
 
         # Make Directory for this microSWIFT
-        microSWIFT_dir_str =  "../mission_{0}/microSWIFT_{1}".format(mission_num, microSWIFT)
+        microSWIFT_dir_str =  mission_dir_str + '/microSWIFT_{}'.format(microSWIFT)
         subprocess.run(["mkdir", "-p", microSWIFT_dir_str])
 
         # Copy microSWIFT log into the microSWIFT directory
