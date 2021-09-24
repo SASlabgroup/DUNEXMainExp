@@ -74,7 +74,7 @@ PASSWORD="1013ne40th"
 record_window_length = datetime.timedelta(hours=1)
 
 # Define project directory
-project_dir = '/Volumes/DUNEXdata/DUNEXMainExp'
+project_dir = '/Volumes/DUNEXdata/DUNEXMainExp/'
 
 # Define Metadata Excel sheet name
 metadata_name = 'DUNEXMainExp_MetaData.xlsx'
