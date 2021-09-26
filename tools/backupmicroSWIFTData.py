@@ -1,0 +1,1 @@
+# Automated script to backup all microSWIFT data from local directory to the RAID on Bigwaves
