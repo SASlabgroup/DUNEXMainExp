@@ -12,8 +12,7 @@ import pynmea2
 import cftime
 
 # Define Project Directory 
-# project_dir = '/Volumes/DUNEXdata/DUNEXMainExp/'
-project_dir = '/Users/edwinrainville/Documents/UW/DUNEX/DUNEXMainExp/' # EJ's Local laptop project directory
+project_dir = '../'
 
 # Define Data Directory
 data_dir = 'microSWIFT_data/'
