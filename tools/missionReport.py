@@ -109,8 +109,7 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
 
     # Add running histogram of significant wave heights sampled
     with doc.create(pylatex.Section('Histogram of Significant Wave heights sampled')):
-        accels = microSWIFTTools.missionAccels()
-        doc.append(accels)
+        doc.append('Histogram of wave heights')
 
 if __name__ == '__main__':
 
