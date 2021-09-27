@@ -54,7 +54,7 @@ def main():
 
     # Define backup directory on bigwaves RAID
     bigwaves = 'bigwaves.apl.washington.edu'
-    backup_dir = '/Volumes/Data/DuckFRF/DUNEXMainExp_2021/'
+    backup_dir = '/Volumes/Data/DuckFRF/DUNEXMainExp_2021/microSWIFT_data/'
 
     # Starting actual data backup
     logging.info('-------------- Data Backup at {} --------------'.format(datetime.datetime.utcnow()))
