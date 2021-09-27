@@ -1,6 +1,7 @@
 # Import Statements
 import subprocess
 import logging
+import datetime
 
 def main():
     '''
@@ -9,6 +10,9 @@ def main():
     Description: This script backs-up all DUNEXdata from the local machine to the remote bigwaves machine so that the data is 
     safe and secure.
     '''
+    # Set up logging
+    log_name = '../microSwIFT_data/data_backup.log'
+    logging.basicConfig(filename=log_name, encoding='utf-8', level=logging.DEBUG)
 
     # Enter Login credentials for bigwaves RAID
     username = input('Enter bigwaves username: ')
@@ -53,15 +57,19 @@ def main():
     backup_dir = '/Volumes/Data/DuckFRF/DUNEXMainExp_2021/'
 
     # Starting actual data backup
+    logging.info('-------------- Data Backup at {} --------------'.format(datetime.datetime.utcnow()))
+    logging.info('Data is being backed up by {}'.format(username))
     print('Backing up data in {0} on local machine to {1} on bigwaves'.format(microSWIFT_data_dir, backup_dir))
 
     # rsync directory
-    backup_process = subprocess.run(['sshpass', '-p', password, 'rsync', '-avz', microSWIFT_data_dir,'{0}@{1}:{2}'.format(username, bigwaves, backup_dir)]) 
+    backup_process = subprocess.run(['sshpass', '-p', password, 'rsync', '-avz', '--log-file={}'.format(log_name), microSWIFT_data_dir,'{0}@{1}:{2}'.format(username, bigwaves, backup_dir)]) 
     backup_process_rc = backup_process.returncode
     if backup_process_rc == 0:
         print('Data was successfully synced from local machine to bigwaves')
+        logging.info('Data was successfully synced from local machine to bigwaves')
     else:
         print('Data was not successfully synced')
+        logging.info('Data was not successfully synced')
 
 # Run this main function as a script
 if __name__ == '__main__':
