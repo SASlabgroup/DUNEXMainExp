@@ -6,7 +6,7 @@ import scipy.signal
 import netCDF4 as nc
 
 
-def mission_map(mission_num, mission_dir_path, mission_nc_path):
+def missionMap(mission_num, mission_dir_path, mission_nc_path):
     '''
     @edwinrainville
 
@@ -29,9 +29,26 @@ def mission_map(mission_num, mission_dir_path, mission_nc_path):
     plt.savefig(figure_path)
     return figure_path
 
-def mission_accels():
+def missionAccels():
     '''
     @edwinrainville
     '''
     return 'This function plots a time series of all accelerations '
+
+def computeWaveProperties():
+    '''
+    @edwinrainville
+
+    Description: This function computes all bulk wave properties about the field from the drifter tracks during a microSWIFT 
+    mission.
+
+    '''
+
+def reconstructWaveField(mission_dir_path):
+    '''
+    @edwinrainville
+
+    Description: This funnction uses a compressive sensing algorithm to reconstruct a field of waves during a 
+    microSWIFT mission. 
+    '''
     
