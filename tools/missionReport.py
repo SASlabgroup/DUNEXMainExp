@@ -103,9 +103,9 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
     with doc.create(pylatex.Section('Drift Track Map')):
         mission_nc_path = mission_dir_path + 'mission_{}.nc'.format(mission_num)
         figure_path = microSWIFTTools.missionMap(mission_num, mission_dir_path, mission_nc_path)
-        # with doc.create(pylatex.Figure(position='htbp')) as plot:
-        #     plot.add_image(os.path.join(figure_path))
-        #     plot.add_caption('I am a caption.')
+        with doc.create(pylatex.Figure(position='htbp')) as plot:
+            plot.add_image('../' + figure_path, width=pylatex.utils.NoEscape(r'0.8\textwidth'), placement=pylatex.utils.NoEscape(r'\centering'))
+            plot.add_caption('Map of Mission {} Drifters.'.format(mission_num))
 
     # Add running histogram of significant wave heights sampled
     with doc.create(pylatex.Section('Histogram of Significant Wave heights sampled')):
