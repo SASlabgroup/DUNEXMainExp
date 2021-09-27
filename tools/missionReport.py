@@ -15,17 +15,20 @@ import pylatex
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-import pandas
+import pandas as pd
 import microSWIFTTools
 import datetime
+import os
 
-def make_report(doc, mission_num):
+def make_report(doc, mission_num, mission_dir_path, metadata_path):
     '''
     @edwinrainville
 
     Builds mission report from data and the metaData spreadsheet.
     '''
-
+    # Read in metadata from the excel sheet
+    dunex_xlsx = pd.read_excel(metadata_path)
+   
     # Add document header
     header = pylatex.PageStyle("header")
     # Create left header
@@ -48,61 +51,64 @@ def make_report(doc, mission_num):
     # Add Overview to document
     with doc.create(pylatex.Section('Overview')):
         # Time info     
-        start_time = 'XXX'
-        end_time = 'XXX'
-        doc.append('Mission number {0} was from {1} to {2}. '.format(mission_num, start_time, end_time))
+        start_time = dunex_xlsx['Start Time'].iloc[mission_num]
+        end_time = dunex_xlsx['End Time'].iloc[mission_num]
+        doc.append('Mission number {0} was from {1} to {2} in UTC time. '.format(mission_num, start_time, end_time))
 
         # Forecast info
-        Hs_forecast = 'XXX'
-        Tp_forecasted = 'XXX'
-        Dp_forecasted = 'XXX'
+        Hs_forecast = dunex_xlsx['Forecasted Significant Wave Height, Hs [m]'].iloc[mission_num]
+        Tp_forecasted = dunex_xlsx['Forecasted Peak Period, Tp [s]'].iloc[mission_num]
+        Dp_forecasted = dunex_xlsx['Forecasted  Peak Direction, Dp [degrees]'].iloc[mission_num]
         doc.append('The forecasted conditions for the day were a significant wave height of {0} meters, \
                     a peak period of {1} seconds and a peak direction of {2} degrees relative to true north. \
                     '.format(Hs_forecast, Tp_forecasted, Dp_forecasted))
 
         # Array type and deployment
-        deployment = 'XXX'
-        array = 'XXX'
+        deployment = dunex_xlsx['Deployment Method'].iloc[mission_num]
+        array = dunex_xlsx['Array Type'].iloc[mission_num]
         doc.append('Due to these forecasted conditions, we deployment the microSWIFTs via {0} in a \
                      {1} array. '.format(deployment, array))
 
         # People and Positions
-        deployer_lead = 'XXX'
-        retriever_lead = 'XXX'
-        aide = 'XXX'
-        notetaker = 'XXX'
+        deployer_lead = dunex_xlsx['Lead Deployer'].iloc[mission_num]
+        retriever_lead = dunex_xlsx['Lead Retriever'].iloc[mission_num]
+        aide = dunex_xlsx['Aide'].iloc[mission_num]
+        notetaker = dunex_xlsx['Notetaker'].iloc[mission_num]
         doc.append('The lead deployer during this mission was {0}, the lead retriever was {1}, the aide was {2} and the \
                     notetaker was {3}. '.format(deployer_lead, retriever_lead, aide, notetaker))
         
         # microSWIFT final check
-        microSWIFT_check = 'XXX'
+        microSWIFT_check = dunex_xlsx['microSWIFTs checked by'].iloc[mission_num]
         doc.append('The final microSWIFT check that all lights were on and lids were secured before deployment was done by {}. '.format(microSWIFT_check))
 
         # microSWIFTs deployed
-        microSWIFTs_deployed = 'XXX'
-        total_num_microSWFITs = 'XXX'
+        microSWIFTs_deployed = dunex_xlsx['microSWIFTs Deployed'].iloc[mission_num]
+        total_num_microSWFITs = dunex_xlsx['Total Number of microSWIFTs'].iloc[mission_num]
         doc.append('The microSWIFTs deployed during this mission were {0} for a total of {1} drifters. '.format(microSWIFTs_deployed, total_num_microSWFITs))
 
         # Additional Notes
-        additional_notes = 'XXX'
+        additional_notes = dunex_xlsx['Deployment Notes'].iloc[mission_num]
         doc.append('The additional notes during the deployment from {0} were the following: '.format(notetaker))
         with doc.create(pylatex.Itemize()) as itemize:
             itemize.add_item(additional_notes)
      
         # Data offload Notes
-        data_offload_check = 'XXX'
-        data_offload_notes = 'XXX'
+        data_offload_check = dunex_xlsx['Data Offloaded and Archived by'].iloc[mission_num]
+        data_offload_notes = dunex_xlsx['Data Offload Notes'].iloc[mission_num]
         doc.append('The data from this mission was offloaded by {0} and the additional data offload notes were: '.format(data_offload_check))
         with doc.create(pylatex.Itemize()) as itemize:
             itemize.add_item(data_offload_notes)
 
     # Add Mission Map to the document
     with doc.create(pylatex.Section('Drift Track Map')):
-        map = microSWIFTTools.mission_map()
-        doc.append(map)
+        mission_nc_path = mission_dir_path + 'mission_{}.nc'.format(mission_num)
+        figure_path = microSWIFTTools.mission_map(mission_num, mission_dir_path, mission_nc_path)
+        # with doc.create(pylatex.Figure(position='htbp')) as plot:
+        #     plot.add_image(os.path.join(figure_path))
+        #     plot.add_caption('I am a caption.')
 
-    # Add Mission Accelerations to the document
-    with doc.create(pylatex.Section('Acceleration Time Series')):
+    # Add running histogram of significant wave heights sampled
+    with doc.create(pylatex.Section('Histogram of Significant Wave heights sampled')):
         accels = microSWIFTTools.mission_accels()
         doc.append(accels)
 
@@ -113,12 +119,13 @@ if __name__ == '__main__':
 
     # Define data directory 
     data_dir = 'microSWIFT_data/'
+    metadata_path = project_dir + 'DUNEXMainExp_MetaData.xlsx'
 
     # Define mission number 
     mission_num = int(input('Enter mission Number: '))
 
     # Define mission directroy
-    mission_dir = '/mission_{}/'.format(mission_num)
+    mission_dir = 'mission_{}/'.format(mission_num)
     mission_dir_path = project_dir + data_dir + mission_dir
 
     # Create report and fill it with analysis of todays data
@@ -126,7 +133,7 @@ if __name__ == '__main__':
     doc_path_str = mission_dir_path + doc_name_str
     geometry_options = {"margin": "0.7in"}
     doc = pylatex.Document(doc_path_str, geometry_options=geometry_options)
-    make_report(doc, mission_num)
+    make_report(doc, mission_num, mission_dir_path, metadata_path)
 
     # Generate the report
     doc.generate_tex()
