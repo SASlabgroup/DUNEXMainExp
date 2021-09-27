@@ -52,3 +52,23 @@ def reconstructWaveField(mission_dir_path):
     microSWIFT mission. 
     '''
     
+def FRFtransform(lat,lon):
+    '''
+    @edwinrainville, Originally written by J. Thomson, 1/2011
+
+    Description: function to convert from lat & lon (decimal degrees, negative longitude) to FRF x,y (meters)
+    '''
+
+    # Define offsets
+    latoffset = 36.178039
+    lonoffset = -75.749672
+
+    # Define constants
+    rotation = 19 #rotation in degress CCW from True north
+    radius = 6371*np.cos(np.radians(36)) # what is 36?
+
+    
+
+    x = ''
+    y = ''
+    return x, y
