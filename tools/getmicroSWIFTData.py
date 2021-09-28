@@ -77,7 +77,7 @@ record_window_length = datetime.timedelta(hours=1)
 project_dir = '../'
 
 # Define Metadata Excel sheet name
-metadata_name = 'DUNEXMainExp_MetaData.xlsx'
+metadata_name = 'DUNEXMainExp_notes.xlsx'
 
 # Combine file name and project Directory
 metadata_filename = project_dir + metadata_name

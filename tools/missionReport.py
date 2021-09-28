@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     # Define data directory 
     data_dir = 'microSWIFT_data/'
-    metadata_path = project_dir + 'DUNEXMainExp_MetaData.xlsx'
+    metadata_path = project_dir + 'DUNEXMainExp_notes.xlsx'
 
     # Define mission number 
     mission_num = int(input('Enter mission Number: '))
