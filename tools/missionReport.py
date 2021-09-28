@@ -70,13 +70,13 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
                      {1} array. '.format(deployment, array))
 
         # People and Positions
-        deployer_lead = dunex_xlsx['Lead Deployer'].iloc[mission_num]
-        retriever_lead = dunex_xlsx['Lead Retriever'].iloc[mission_num]
-        aide = dunex_xlsx['Aide'].iloc[mission_num]
-        notetaker = dunex_xlsx['Notetaker'].iloc[mission_num]
-        doc.append('The lead deployer during this mission was {0}, the lead retriever was {1}, the aide was {2} and the \
-                    notetaker was {3}. '.format(deployer_lead, retriever_lead, aide, notetaker))
-        
+        deployer_1 = dunex_xlsx['Deployer 1'].iloc[mission_num]
+        deployer_2 = dunex_xlsx['Deployer 2'].iloc[mission_num]
+        retriever_1 = dunex_xlsx['Retriever 1'].iloc[mission_num]
+        retriever_2 = dunex_xlsx['Retriever 2/ Notetaker'].iloc[mission_num]
+        doc.append( 'The positions for this deployment were {} as deployer 1, {} as deployer 2, {} as \
+                    retriever 1 and {} as retriever 2 and notetaker'.format(deployer_1, deployer_2, retriever_1, retriever_2))
+
         # microSWIFT final check
         microSWIFT_check = dunex_xlsx['microSWIFTs checked by'].iloc[mission_num]
         doc.append('The final microSWIFT check that all lights were on and lids were secured before deployment was done by {}. '.format(microSWIFT_check))
@@ -88,7 +88,7 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
 
         # Additional Notes
         additional_notes = dunex_xlsx['Deployment Notes'].iloc[mission_num]
-        doc.append('The additional notes during the deployment from {0} were the following: '.format(notetaker))
+        doc.append('The additional notes during the deployment from {0} were the following: '.format(retriever_2))
         with doc.create(pylatex.Itemize()) as itemize:
             itemize.add_item(additional_notes)
      
