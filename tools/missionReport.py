@@ -12,13 +12,9 @@ The daily report will include:
 
 # Import Statements
 import pylatex
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy import signal
 import pandas as pd
 import microSWIFTTools
 import datetime
-import os
 
 def make_report(doc, mission_num, mission_dir_path, metadata_path):
     '''
