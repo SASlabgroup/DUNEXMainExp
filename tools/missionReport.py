@@ -117,7 +117,7 @@ if __name__ == '__main__':
     metadata_path = project_dir + 'DUNEXMainExp_notes.xlsx'
 
     # Define mission number 
-    mission_num = int(input('Enter mission Number: '))
+    mission_num = int(input('Enter Mission Number: '))
 
     # Define mission directroy
     mission_dir = 'mission_{}/'.format(mission_num)
