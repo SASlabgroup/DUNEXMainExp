@@ -74,7 +74,7 @@ def reconstructWaveField(mission_dir_path):
     microSWIFT mission. 
     '''
     
-def FRFtransform(lat,lon):
+def transform2FRF(lat,lon):
     '''
     @edwinrainville, Originally written by J. Thomson, 1/2011
 
@@ -82,17 +82,31 @@ def FRFtransform(lat,lon):
     '''
 
     # Define offsets
-    latoffset = 36.178039
-    lonoffset = -75.749672
+    lat_offset = 36.178039
+    lon_offset = -75.749672
 
     # Define constants
     rotation = 19 #rotation in degress CCW from True north
-    radius = 6371*np.cos(np.radians(36)) # what is 36?
 
-    
+    # Radius of Earth
+    earth_rad = 6378.1 * 1000 # units are meters
 
-    x = ''
-    y = ''
+    # correct radius for latitutde 
+    radius_at_latoffset = earth_rad * np.cos(np.deg2rad(np.median(lat_offset))) 
+
+    # Compute North-South and East-West Locations
+    north = np.empty(lat.shape)
+    east = np.empty(lon.shape)
+    for n in np.arange(lat.shape[0]):
+        north[n] = earth_rad * np.deg2rad(lat[n]- lat_offset)
+        east[n] = radius_at_latoffset * np.deg2rad(lon_offset - lon[n]) 
+
+    # Rotate Coordinates by 19 degrees CCW from True north
+    x = east * np.cos(np.deg2rad(rotation))   -   north * np.sin (np.deg2rad(rotation))
+    x = -x # Flip x 
+    y = east * np.sin(np.deg2rad(rotation))   +   north * np.cos (np.deg2rad(rotation))
+
+    # return x and y values
     return x, y
 
 def localCoordinateTransform(lat, lon):
