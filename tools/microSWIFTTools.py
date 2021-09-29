@@ -92,3 +92,14 @@ def FRFtransform(lat,lon):
     x = ''
     y = ''
     return x, y
+
+def localCoordinateTransform(lat, lon):
+    '''
+    @edwinrainville
+
+    Description: This function transforms an arbitrary set of lat and lon coordinates from a mission and computes a 
+    local coordinate system that has an origin at the meann value of the lat and lon coordinates. This returns the x and
+    y values in the new coordinate system. Units are meters from origin.
+
+    '''
+    # 
