@@ -20,17 +20,19 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
 
     # Create map of all drift tracks during mission
     fig, ax = plt.subplots(figsize=(8,6))
-    ax.set_xlabel('Longitude')  
-    ax.set_ylabel('Latitude')
-    fig.autofmt_xdate()
+    ax.set_xlabel('Local X Location [meters]')  
+    ax.set_ylabel('Local Y Location [meters]')
 
     # Sort time labels 
     min_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][0]
     max_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][-1]
 
     for microSWIFT in microSWIFTs_on_mission:
+        # Compute local coordinates from each lat-lon series
+        x, y = localCoordinateTransform(lat=mission_dataset[microSWIFT]['GPS']['lat'][:], lon=mission_dataset[microSWIFT]['GPS']['lon'][:])
+
         # Plot the lat-lon map with color coded points in time
-        map = ax.scatter(mission_dataset[microSWIFT]['GPS']['lon'][:], mission_dataset[microSWIFT]['GPS']['lat'][:], c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
+        map = ax.scatter(x, y, c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
         # reset time labels for colormap 
         if mission_dataset[microSWIFT]['GPS']['time'][0] < min_time_label:
             min_time_label = mission_dataset[microSWIFT]['GPS']['time'][0]
