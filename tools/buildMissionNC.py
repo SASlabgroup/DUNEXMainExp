@@ -1,20 +1,21 @@
 # Build microSWIFT netCDF data structure from raw text data files
-'''
-@edwinrainville
-
-Description: This script takes all the raw offloaded microSWIFT data and loads it in to a well organized and formatted 
-            netCDF file that can then be easily analyzed for each mission.
-
-'''
+# Import statements
+from netCDF4 import Dataset
+import datetime
+import glob
+import numpy as np
+import pynmea2
+import cftime
+import microSWIFTTools
 
 def main():
-    # Import statements
-    from netCDF4 import Dataset
-    import datetime
-    import glob
-    import numpy as np
-    import pynmea2
-    import cftime
+    '''
+    @edwinrainville
+
+    Description: This script takes all the raw offloaded microSWIFT data and loads it in to a well organized and formatted 
+                netCDF file that can then be easily analyzed for each mission.
+
+    '''
 
     # Define Project Directory 
     project_dir = '../'
@@ -163,6 +164,8 @@ def main():
 
         # Read in GPS data from each file in the GPS list
         for gps_file in gps_file_list:
+            print(gps_file)
+            
             with open(gps_file, 'r') as file:
                 
                     for line in file:
@@ -261,6 +264,15 @@ def main():
         z_nc = gpsgrp.createVariable('z', 'f8', ('time',))
         z_nc[:] = z_sorted
 
+        # Compute FRF x and y locations 
+        x, y = microSWIFTTools.transform2FRF(lat=lat_sorted, lon=lon_sorted)
+        x_frf_nc = gpsgrp.createVariable('x_frf', 'f8', ('time',))
+        x_frf_nc.units = 'meters'
+        x_frf_nc[:] = x
+        y_frf_nc = gpsgrp.createVariable('y_frf', 'f8', ('time',))
+        y_frf_nc.units = 'meters'
+        y_frf_nc[:] = y
+
         # GPS Velocity variable
         gps_velocity = gpsgrp.createDimension('gps_velocity', len(u))
         u_nc = gpsgrp.createVariable('u', 'f8', ('gps_velocity',))
@@ -269,6 +281,8 @@ def main():
         v_nc = gpsgrp.createVariable('v', 'f8', ('gps_velocity',))
         v_nc.units = 'm/s'
         v_nc[:] = v
+
+        
 
 # Run the Script
 if __name__=='__main__':
