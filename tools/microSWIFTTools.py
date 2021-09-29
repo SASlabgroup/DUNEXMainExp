@@ -102,4 +102,26 @@ def localCoordinateTransform(lat, lon):
     y values in the new coordinate system. Units are meters from origin.
 
     '''
-    # 
+    # Make sure that lat and lon are numpy arrays 
+    lat = np.array(lat)
+    lon = np.array(lon)
+
+    # Compute origin of lat-lon coordinates
+    lat_center = np.mean(lat)
+    lon_center = np.mean(lon)
+
+    # Radius of Earth
+    earth_rad = 6378.1 * 1000 # units are meters
+
+    # correct radius for latitutde 
+    lon_earth_rad = np.cos(np.deg2rad(np.median(lat)))*earth_rad   
+
+    # Compute Deviations about the lat-lon center in the new cooridnate system
+    y = np.empty(lat.shape)
+    x = np.empty(lon.shape)
+    for n in np.arange(lat.shape[0]):
+        y[n] = earth_rad * np.deg2rad(lat_center - lat[n])
+        x[n] = lon_earth_rad * np.deg2rad(lon_center - lon[n])  
+
+    # Return the x and y coordinates 
+    return x, y
