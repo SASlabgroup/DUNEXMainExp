@@ -30,7 +30,7 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
 
     for microSWIFT in microSWIFTs_on_mission:
         # Plot the lat-lon map with color coded points in time
-        map = ax.scatter(mission_dataset[microSWIFT]['GPS']['lon'][:], mission_dataset[microSWIFT]['GPS']['lat'][:], c=mission_dataset[microSWIFT]['GPS']['time'][:])
+        map = ax.scatter(mission_dataset[microSWIFT]['GPS']['lon'][:], mission_dataset[microSWIFT]['GPS']['lat'][:], c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
         # reset time labels for colormap 
         if mission_dataset[microSWIFT]['GPS']['time'][0] < min_time_label:
             min_time_label = mission_dataset[microSWIFT]['GPS']['time'][0]
