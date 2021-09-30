@@ -1,0 +1,63 @@
+\documentclass{article}
+
+% https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+% Formatting
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage[titletoc,title]{appendix}
+\usepackage{graphicx}
+
+% Math package
+\usepackage{amsmath}
+
+% Inlcude pdfs package
+\usepackage{pdfpages}
+
+\begin{document}
+
+% Title content
+\title{Mapping phase-resolved wave breaking and currents in the surf-zone during extreme conditions using arrays of ‘microSWIFT’ drifters}
+\author{EJ Rainville, Jim Thomson, Melissa Moulton, Morteza Derakhti, Christie Hegermiller	}
+\date{September 30, 2021}
+\maketitle
+
+% Abstract Section
+\input{abstract}
+
+% % Introduction and Overview Section
+% \input{intro}
+
+% % Theoretical Background
+% \input{theoretical_background}
+
+% % Algorithm Implementation and Development
+% \input{algorithm}
+
+% % Computational Results
+% \input{results}
+
+% % Summary and Conclusions
+% \input{conclusion}
+
+% % References
+% \printbibliography
+
+% % Appendices
+% \begin{appendices}
+
+% % Python Functions
+% \input{functions}
+
+% % Jupyter Notebook
+% \section{Python Code - Jupyter Notebook}
+% \label{appendix:notebook}
+% The source code for this project can be found in my Github repository: https://github.com/edwinrainville/AMATH582. The Jupyter notebook is also attached on the following page. 
+% \includepdf[pages=-]{WaveFieldReconstruction.pdf}
+
+% \end{appendices}
+
+
+\end{document}
