@@ -54,8 +54,10 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
 def missionAccels():
     '''
     @edwinrainville
+
+    Description: This function plots a time series of all accelerations
+    
     '''
-    return 'This function plots a time series of all accelerations '
 
 def computeWaveProperties():
     '''
@@ -73,6 +75,7 @@ def reconstructWaveField(mission_dir_path):
     Description: This funnction uses a compressive sensing algorithm to reconstruct a field of waves during a 
     microSWIFT mission. 
     '''
+
     
 def transform2FRF(lat,lon):
     '''
