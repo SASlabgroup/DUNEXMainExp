@@ -33,7 +33,16 @@ def main():
     ncfile_name = project_dir + data_dir + mission_dir + 'mission_{}.nc'.format(mission_num)
 
     # Open netCDF dataset
-    rootgrp = Dataset(ncfile_name, 'w')
+    rootgrp = Dataset(ncfile_name, 'w', clobber=True)
+
+    # Add sampling frequency information to the netcdf file
+    single_val_dim = rootgrp.createDimension('single_value', 1)
+    gps_freq = rootgrp.createVariable('gps_freq', 'f8', ('single_value'))
+    gps_freq[:] = 4
+    gps_freq.units = 'Hz'
+    imu_freq = rootgrp.createVariable('imu_freq', 'f8', ('single_value'))
+    imu_freq[:] = 12
+    imu_freq.units = 'Hz'
 
     # Define microSWIFT num
     microSWIFT_dir_list = glob.glob(project_dir + data_dir + mission_dir + 'microSWIFT_*')
