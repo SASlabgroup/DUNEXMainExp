@@ -1,6 +1,7 @@
 # Build microSWIFT netCDF data structure from raw text data files
 # Import statements
 from netCDF4 import Dataset
+from scipy import interpolate
 import datetime
 import glob
 import numpy as np
@@ -156,11 +157,14 @@ def main():
 
         # Define lists for each variable
         gps_time = []
+        gps_time_linenum = []
         lat = []
         lon = []
         u = []
         v = []
         z= []
+        vel_linenum = []
+        linenum = 0
 
         # Read in GPS data from each file in the GPS list
         for gps_file in gps_file_list:
@@ -170,6 +174,7 @@ def main():
                 
                     for line in file:
                         if "GPGGA" in line:
+                            linenum += 1
                             gpgga = pynmea2.parse(line,check=True)   #grab gpgga sentence and parse
                             #check to see if we have lost GPS fix
                             if gpgga.gps_qual < 1:
@@ -221,20 +226,24 @@ def main():
                             gps_date = datetime.date.fromisoformat(date_str)
                             gps_datetime = datetime.datetime.combine(gps_date, gpgga.timestamp)
                             gps_time.append(gps_datetime)
-
+                            gps_time_linenum_val = linenum
+                            gps_time_linenum.append(gps_time_linenum_val)
                             # Read in other attributes from the GPGGA sentence
                             z.append(gpgga.altitude)
                             lat.append(gpgga.latitude)
                             lon.append(gpgga.longitude)
                         elif "GPVTG" in line:
+                            linenum += 1
+                            vel_linenum.append(linenum)
                             if gpgga.gps_qual < 1:
                                 continue
                             gpvtg = pynmea2.parse(line,check=True)   #grab gpvtg sentence
                             u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
                             v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
                         else: #if not GPGGA or GPVTG, continue to start of loop
+                            linenum += 1
                             continue
-
+        
         # Sort each list based on time before saving so that each data point is in chronological order
         gps_time = np.array(gps_time)
         gps_time_sorted_inds = gps_time.argsort()
@@ -244,7 +253,6 @@ def main():
         z_sorted = np.array(z)[gps_time_sorted_inds]
 
         # Save GPS data to netCDF file
-        # Create gps time dimension
         gps_time_dim = gpsgrp.createDimension('time', len(gps_time_sorted))
 
         # GPS Time Variable
@@ -272,17 +280,31 @@ def main():
         y_frf_nc = gpsgrp.createVariable('y_frf', 'f8', ('time',))
         y_frf_nc.units = 'meters'
         y_frf_nc[:] = y
-
-        # GPS Velocity variable
-        gps_velocity = gpsgrp.createDimension('gps_velocity', len(u))
-        u_nc = gpsgrp.createVariable('u', 'f8', ('gps_velocity',))
-        u_nc.units = 'm/s'
-        u_nc[:] = u
-        v_nc = gpsgrp.createVariable('v', 'f8', ('gps_velocity',))
-        v_nc.units = 'm/s'
-        v_nc[:] = v
-
         
+        # Interpolate times from GPGGA time to the GPVTG time
+        # gps_time_num_notsorted = cftime.date2num(gps_time, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
+        extrap_func = interpolate.interp1d(gps_time_linenum, gps_time_num, fill_value='extrapolate')
+        gps_vel_time = extrap_func(vel_linenum)
+
+        # Sort GPS velocites based on gps time
+        gps_vel_time = np.array(gps_vel_time)
+        gps_vel_time_sorted_inds = gps_vel_time.argsort()
+        gps_vel_time_sorted = gps_vel_time[gps_vel_time_sorted_inds]
+        u_sorted = np.array(u)[gps_vel_time_sorted_inds]
+        v_sorted = np.array(v)[gps_vel_time_sorted_inds]
+
+        # Add all GPS Velocity values to the mission netcdf file
+        gps_vel_time_dim = gpsgrp.createDimension('gps_velocity_time', len(vel_linenum))
+        gps_vel_time_nc = gpsgrp.createVariable('gps_vel_time', 'f8', ('gps_velocity_time',))
+        gps_vel_time_nc.units = "hours since 1970-01-01 00:00:00"
+        gps_vel_time_nc.calendar = "standard"
+        gps_vel_time_nc[:] = gps_vel_time
+        u_nc = gpsgrp.createVariable('u', 'f8', ('gps_velocity_time',))
+        u_nc.units = 'm/s'
+        u_nc[:] = u_sorted
+        v_nc = gpsgrp.createVariable('v', 'f8', ('gps_velocity_time',))
+        v_nc.units = 'm/s'
+        v_nc[:] = v_sorted
 
 # Run the Script
 if __name__=='__main__':
