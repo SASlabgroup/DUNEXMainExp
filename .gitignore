@@ -148,3 +148,4 @@ writing/main.bcf
 .gitignore
 writing/main.run.xml
 .gitignore
+writing/main.synctex.gz
