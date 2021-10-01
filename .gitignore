@@ -154,3 +154,6 @@ writing/main.bbl
 writing/main.blg
 writing/main.fdb_latexmk
 writing/main.fls
+writing/main.pdf
+.gitignore
+writing/main.pdf
