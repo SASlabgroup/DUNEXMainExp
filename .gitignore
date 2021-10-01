@@ -149,3 +149,8 @@ writing/main.bcf
 writing/main.run.xml
 .gitignore
 writing/main.synctex.gz
+writing/main.aux
+writing/main.bbl
+writing/main.blg
+writing/main.fdb_latexmk
+writing/main.fls
