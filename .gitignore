@@ -144,3 +144,7 @@ microSWIFT_data/
 ~$DUNEX-Notes.pptx
 ~$DUNEXMainExp_notes.xlsx
 .vscode/settings.json
+writing/main.bcf
+.gitignore
+writing/main.run.xml
+.gitignore
