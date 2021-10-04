@@ -22,7 +22,6 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
     fig, ax = plt.subplots(figsize=(8,6))
     ax.set_xlabel('Local X Location [meters]')  
     ax.set_ylabel('Local Y Location [meters]')
-    ax.invert_yaxis()
 
     # Sort time labels 
     min_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][0]
