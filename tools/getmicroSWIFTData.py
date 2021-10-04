@@ -111,6 +111,12 @@ for microSWIFT in dunex_xlsx['microSWIFTs Deployed'].iloc[mission_num].split(','
     microSWIFTs_deployed.append(int(microSWIFT))
 logging.info('microSWIFTs Deployed on this mission were: {}'.format(microSWIFTs_deployed))
 
+# Get list of microSWIFTs that were retrieved 
+microSWIFTs_retrieved = []
+for microSWIFT in dunex_xlsx['microSWIFTs Retrieved'].iloc[mission_num].split(','):
+    microSWIFTs_retrieved.append(int(microSWIFT))
+logging.info('microSWIFTs Deployed on this mission were: {}'.format(microSWIFTs_retrieved))
+
 # Loop through each microSWIFT on the network to offload data
 time_to_offload_list = []
 num_offloaded = 0
@@ -118,7 +124,7 @@ microSWIFTs_not_offloaded = []
 num_not_offloaded = 0
 
 logging.info('------------ Data Offload ------------')
-for microSWIFT in microSWIFTs_deployed:
+for microSWIFT in microSWIFTs_retrieved:
 
     # Offload time
     start_offload_time = datetime.datetime.utcnow()
