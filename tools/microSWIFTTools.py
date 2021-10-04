@@ -22,6 +22,7 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
     fig, ax = plt.subplots(figsize=(8,6))
     ax.set_xlabel('Local X Location [meters]')  
     ax.set_ylabel('Local Y Location [meters]')
+    ax.invert_yaxis()
 
     # Sort time labels 
     min_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][0]
@@ -29,7 +30,7 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
 
     for microSWIFT in microSWIFTs_on_mission:
         # Compute local coordinates from each lat-lon series
-        x, y = localCoordinateTransform(lat=mission_dataset[microSWIFT]['GPS']['lat'][:], lon=mission_dataset[microSWIFT]['GPS']['lon'][:])
+        x, y = transform2FRF(lat=mission_dataset[microSWIFT]['GPS']['lat'][:], lon=mission_dataset[microSWIFT]['GPS']['lon'][:])
 
         # Plot the lat-lon map with color coded points in time
         map = ax.scatter(x, y, c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
