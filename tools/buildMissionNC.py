@@ -51,7 +51,12 @@ def main():
     for microSWIFT_dir in microSWIFT_dir_list:
 
         # Define microSWIFT number from directory name
-        microSWIFT_num = int(microSWIFT_dir[-2:])
+        microSWIFT_num = microSWIFT_dir[-2:]
+        if microSWIFT_num[0] == '_':
+            microSWIFT_num = int(microSWIFT_num[1:])
+        else:
+            microSWIFT_num = int(microSWIFT_num)
+        
 
         print(microSWIFT_num)
 
