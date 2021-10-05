@@ -8,6 +8,7 @@ import numpy as np
 import pynmea2
 import cftime
 import microSWIFTTools
+import pandas as pd
 
 def main():
     '''
@@ -24,10 +25,23 @@ def main():
     # Define Data Directory
     data_dir = 'microSWIFT_data/'
 
+    # Define Metadata Excel sheet name
+    metadata_name = 'DUNEXMainExp_notes.xlsx'
+
+    # Combine file name and project Directory
+    metadata_filename = project_dir + metadata_name
+
+    # Create dataframe object from DUNEX MetaData SpreadSheet
+    dunex_xlsx = pd.read_excel(metadata_filename)
+
     # Define Mission Number
     # User input for mission number 
     mission_num = int(input('Enter Mission Number: '))
     mission_dir = 'mission_{}/'.format(mission_num)
+
+    # Get start and end times
+    start_time = datetime.datetime.fromisoformat(dunex_xlsx['Start Time'].iloc[mission_num])
+    end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
 
     # Define netCDF filename and path
     ncfile_name = project_dir + data_dir + mission_dir + 'mission_{}.nc'.format(mission_num)
@@ -104,10 +118,18 @@ def main():
                     else:
                         continue
 
+        # Sort the time to be within the mission time window from the notes spreadsheet
+        imu_time_in_mission = []
+        for time in imu_time:
+            if time >= start_time and time <= end_time:
+                imu_time_in_mission.append(time)
+            else:
+                continue
+
         # Sort each list based on time before saving so that each data point is in chronological order
-        imu_time = np.array(imu_time)
-        imu_time_sorted_inds = imu_time.argsort()
-        imu_time_sorted = imu_time[imu_time_sorted_inds]
+        imu_time_in_mission = np.array(imu_time_in_mission)
+        imu_time_sorted_inds = imu_time_in_mission.argsort()
+        imu_time_sorted = imu_time_in_mission[imu_time_sorted_inds]
         accel_x_sorted = np.array(accel_x)[imu_time_sorted_inds]
         accel_y_sorted = np.array(accel_y)[imu_time_sorted_inds]
         accel_z_sorted = np.array(accel_z)[imu_time_sorted_inds]
@@ -257,11 +279,22 @@ def main():
                         else: #if not GPGGA or GPVTG, continue to start of loop
                             linenum += 1
                             continue
-        
+
+        # Sort the time to be within the mission time window from the notes spreadsheet
+        gps_time_in_mission = []
+        for time in gps_time:
+            if time >= start_time and time <= end_time:
+                gps_time_in_mission.append(time)
+            else:
+                continue
+
         # Sort each list based on time before saving so that each data point is in chronological order
-        gps_time = np.array(gps_time)
-        gps_time_sorted_inds = gps_time.argsort()
-        gps_time_sorted = gps_time[gps_time_sorted_inds]
+        gps_time_in_mission = np.array(gps_time_in_mission)
+        gps_time_sorted_inds = gps_time_in_mission.argsort()
+
+        # Sorted GPS values
+        gps_time_sorted = gps_time_in_mission[gps_time_sorted_inds]
+        gps_time_linenum = np.array(gps_time_linenum)[gps_time_sorted_inds]
         lat_sorted = np.array(lat)[gps_time_sorted_inds]
         lon_sorted = np.array(lon)[gps_time_sorted_inds]
         z_sorted = np.array(z)[gps_time_sorted_inds]
