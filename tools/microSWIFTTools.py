@@ -20,8 +20,17 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
 
     # Create map of all drift tracks during mission
     fig, ax = plt.subplots(figsize=(8,6))
-    ax.set_xlabel('Local X Location [meters]')  
-    ax.set_ylabel('Local Y Location [meters]')
+    ax.set_xlabel('FRF X Location [meters]')  
+    ax.set_ylabel('FRF Y Location [meters]')
+
+    # Add the FRF Bathymetry to the map 
+    # Data from September 28th, 2021
+    bathy_url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20210928.nc'
+    bathy_dataset = nc.Dataset(bathy_url)
+    # Create grid from coordinates
+    xFRF_grid, yFRF_grid = np.meshgrid(bathy_dataset['xFRF'][:],bathy_dataset['yFRF'][:])
+    bathy = bathy_dataset['elevation'][0,:,:]
+    ax.contourf(xFRF_grid, yFRF_grid, bathy, cmap='gray')
 
     # Sort time labels 
     min_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][0]
@@ -47,6 +56,7 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
     time_labels = [time_labels[0].strftime('%Y-%m-%d %H:%M'), time_labels[1].strftime('%Y-%m-%d %H:%M')]
     cbar.ax.set_yticklabels(time_labels, rotation=0, va='center')
     plt.tight_layout()
+    ax.set_aspect('equal')
     figure_path = mission_dir_path + 'mission_{}_map.png'.format(mission_num)
     plt.savefig(figure_path)
     return figure_path
