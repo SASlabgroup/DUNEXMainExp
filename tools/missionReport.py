@@ -49,21 +49,21 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
         # Time info     
         start_time = dunex_xlsx['Start Time'].iloc[mission_num]
         end_time = dunex_xlsx['End Time'].iloc[mission_num]
-        doc.append('Mission number {0} was from {1} to {2} in UTC time. '.format(mission_num, start_time, end_time))
+        doc.append('Mission #{0} was from {1} to {2} in UTC time. '.format(mission_num, start_time, end_time))
 
         # Forecast info
         Hs_forecast = dunex_xlsx['Forecasted Significant Wave Height, Hs [m]'].iloc[mission_num]
         Tp_forecasted = dunex_xlsx['Forecasted Peak Period, Tp [s]'].iloc[mission_num]
         Dp_forecasted = dunex_xlsx['Forecasted  Peak Direction, Dp [degrees]'].iloc[mission_num]
         doc.append('The forecasted conditions for the day were a significant wave height of {0} meters, \
-                    a peak period of {1} seconds and a peak direction of {2} degrees relative to true north. \
+                    a peak period of {1} seconds and the waves were coming from {2}. \
                     '.format(Hs_forecast, Tp_forecasted, Dp_forecasted))
 
         # Array type and deployment
         deployment = dunex_xlsx['Deployment Method'].iloc[mission_num]
         array = dunex_xlsx['Array Type'].iloc[mission_num]
-        doc.append('Due to these forecasted conditions, we deployment the microSWIFTs via {0} in a \
-                     {1} array. '.format(deployment, array))
+        doc.append('Due to these forecasted conditions, we deployed the microSWIFTs via {0} in \
+                     {1}. '.format(deployment, array))
 
         # People and Positions
         deployer_1 = dunex_xlsx['Deployer 1'].iloc[mission_num]
@@ -71,7 +71,7 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
         retriever_1 = dunex_xlsx['Retriever 1'].iloc[mission_num]
         retriever_2 = dunex_xlsx['Retriever 2/ Notetaker'].iloc[mission_num]
         doc.append( 'The positions for this deployment were {} as deployer 1, {} as deployer 2, {} as \
-                    retriever 1 and {} as retriever 2 and notetaker'.format(deployer_1, deployer_2, retriever_1, retriever_2))
+                    retriever 1 and {} as retriever 2 and the notetaker, respectively. '.format(deployer_1, deployer_2, retriever_1, retriever_2))
 
         # microSWIFT final check
         microSWIFT_check = dunex_xlsx['microSWIFTs checked by'].iloc[mission_num]
@@ -80,7 +80,12 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
         # microSWIFTs deployed
         microSWIFTs_deployed = dunex_xlsx['microSWIFTs Deployed'].iloc[mission_num]
         total_num_microSWFITs = dunex_xlsx['Total Number of microSWIFTs'].iloc[mission_num]
-        doc.append('The microSWIFTs deployed during this mission were {0} for a total of {1} drifters. '.format(microSWIFTs_deployed, total_num_microSWFITs))
+        doc.append('The microSWIFTs deployed during this mission were {0} for a total of {1} microSWIFTs. '.format(microSWIFTs_deployed, total_num_microSWFITs))
+
+        # microSWIFTs retrieved
+        microSWIFTs_retrieved = dunex_xlsx['microSWIFTs Retrieved'].iloc[mission_num]
+        doc.append('The microSWIFTs retrieved today were {0}. '.format(microSWIFTs_retrieved))
+
 
         # Additional Notes
         additional_notes = dunex_xlsx['Deployment Notes'].iloc[mission_num]
@@ -101,11 +106,11 @@ def make_report(doc, mission_num, mission_dir_path, metadata_path):
         figure_path = microSWIFTTools.missionMap(mission_num, mission_dir_path, mission_nc_path)
         with doc.create(pylatex.Figure(position='htbp')) as plot:
             plot.add_image('../' + figure_path, width=pylatex.utils.NoEscape(r'0.8\textwidth'), placement=pylatex.utils.NoEscape(r'\centering'))
-            plot.add_caption('Map of Mission {} Drifters.'.format(mission_num))
+            plot.add_caption('Map of Mission {} Drifters and most currrent measured bathymetry at the FRF.'.format(mission_num))
 
-    # Add running histogram of significant wave heights sampled
-    with doc.create(pylatex.Section('Histogram of Significant Wave heights sampled')):
-        doc.append('Histogram of wave heights')
+    # # Add running histogram of significant wave heights sampled
+    # with doc.create(pylatex.Section('Histogram of Significant Wave heights sampled')):
+    #     doc.append('Histogram of wave heights')
 
 if __name__ == '__main__':
 
