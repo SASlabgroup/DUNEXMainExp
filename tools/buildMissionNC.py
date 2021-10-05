@@ -248,9 +248,9 @@ def main():
                             lon.append(gpgga.longitude)
                         elif "GPVTG" in line:
                             linenum += 1
-                            vel_linenum.append(linenum)
                             if gpgga.gps_qual < 1:
                                 continue
+                            vel_linenum.append(linenum)
                             gpvtg = pynmea2.parse(line,check=True)   #grab gpvtg sentence
                             u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
                             v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
