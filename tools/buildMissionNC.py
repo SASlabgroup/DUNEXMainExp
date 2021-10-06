@@ -1,6 +1,7 @@
 # Build microSWIFT netCDF data structure from raw text data files
 # Import statements
 from netCDF4 import Dataset
+import netCDF4 as nc
 from scipy import interpolate
 import datetime
 import glob
@@ -148,7 +149,7 @@ def main():
         imu_time_nc = imugrp.createVariable('time', 'f8', ('time',))
         imu_time_nc.units = "hours since 1970-01-01 00:00:00"
         imu_time_nc.calendar = "gregorian"
-        imu_time_num = cftime.date2num(imu_time_sorted, units=imu_time_nc.units,calendar=imu_time_nc.calendar)
+        imu_time_num = nc.date2num(imu_time_sorted, units=imu_time_nc.units,calendar=imu_time_nc.calendar)
         imu_time_nc[:] = imu_time_num
 
         # Accelerations
@@ -306,7 +307,7 @@ def main():
         gps_time_nc = gpsgrp.createVariable('time', 'f8', ('time',))
         gps_time_nc.units = "hours since 1970-01-01 00:00:00"
         gps_time_nc.calendar = "standard"
-        gps_time_num = cftime.date2num(gps_time_sorted, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
+        gps_time_num = nc.date2num(gps_time_sorted, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
         gps_time_nc[:] = gps_time_num
 
         # Locations
