@@ -134,6 +134,10 @@ microSWIFT_data/
 ._DUNEXMainExp_MetaData.xlsx
 ._README.pptx
 
+# Ignore photos and videos
+PhotosVideos/
+
+
 # Ignore virtual environment
  bin/
  etc/
