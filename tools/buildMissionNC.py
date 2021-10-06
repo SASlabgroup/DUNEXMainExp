@@ -142,7 +142,7 @@ def main():
 
         # Create IMU dimensions and write data to netCDF file
         # Create imu time dimension
-        imu_time_dim = imugrp.createDimension('time', len(imu_time_sorted))
+        imu_time_dim = imugrp.createDimension('time', imu_time_sorted.shape[0])
 
         # IMU Time Variable
         imu_time_nc = imugrp.createVariable('time', 'f8', ('time',))
