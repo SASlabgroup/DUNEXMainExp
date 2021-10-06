@@ -281,24 +281,35 @@ def main():
                             linenum += 1
                             continue
 
-        # Sort the time to be within the mission time window from the notes spreadsheet
-        gps_time_in_mission = []
-        for time in gps_time:
-            if time >= start_time and time <= end_time:
-                gps_time_in_mission.append(time)
-            else:
-                continue
-
         # Sort each list based on time before saving so that each data point is in chronological order
-        gps_time_in_mission = np.array(gps_time_in_mission)
-        gps_time_sorted_inds = gps_time_in_mission.argsort()
+        gps_time = np.array(gps_time)
+        gps_time_sorted_inds = gps_time.argsort()
 
         # Sorted GPS values
-        gps_time_sorted = gps_time_in_mission[gps_time_sorted_inds]
+        gps_time_sorted = gps_time[gps_time_sorted_inds]
         gps_time_linenum = np.array(gps_time_linenum)[gps_time_sorted_inds]
         lat_sorted = np.array(lat)[gps_time_sorted_inds]
         lon_sorted = np.array(lon)[gps_time_sorted_inds]
         z_sorted = np.array(z)[gps_time_sorted_inds]
+
+        # Sort the time to be within the mission time window from the notes spreadsheet
+        current_ind = 0
+        inds_in_mission = []
+        for time in gps_time_sorted:
+            current_ind += 1
+            if time >= start_time and time <= end_time:
+                inds_in_mission.append(current_ind)
+            else:
+                continue
+        
+        print(gps_time_sorted.shape)
+        print(len(inds_in_mission))
+        # Sort the values based on the indices within the mission time 
+        gps_time_in_mission = np.array(gps_time_sorted)[inds_in_mission]
+        gps_time_linenum_in_mission = gps_time_linenum[inds_in_mission]
+        lat_sorted_in_mission = lat_sorted[inds_in_mission]
+        lon_sorted_in_mission = lon_sorted[inds_in_mission]
+        z_sorted_in_mission = z_sorted[inds_in_mission]
 
         # Save GPS data to netCDF file
         gps_time_dim = gpsgrp.createDimension('time', len(gps_time_sorted))
