@@ -135,69 +135,74 @@ def main():
         gyro_y_sorted = np.array(gyro_y)[imu_time_sorted_inds]    
         gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]  
 
-        # # Sort the time to be within the mission time window from the notes spreadsheet
-        # imu_time_in_mission = []
-        # for time in imu_time_sorted:
-        #     if time >= start_time and time <= end_time:
-        #         imu_time_in_mission.append(time)
-        #     else:
-        #         continue
+        # Sort the time to be within the mission time window from the notes spreadsheet
+        current_ind = 0
+        inds_in_mission = []
+        for time in imu_time_sorted:
+            if time >= start_time and time <= end_time:
+                inds_in_mission.append(current_ind)
+                current_ind += 1
+            else:
+                current_ind += 1
+                continue
 
- 
-        # imu_time_sorted = imu_time_in_mission[imu_time_sorted_inds]
-        # accel_x_sorted = np.array(accel_x)[imu_time_sorted_inds]
-        # accel_y_sorted = np.array(accel_y)[imu_time_sorted_inds]
-        # accel_z_sorted = np.array(accel_z)[imu_time_sorted_inds]
-        # mag_x_sorted = np.array(mag_x)[imu_time_sorted_inds]    
-        # mag_y_sorted = np.array(mag_y)[imu_time_sorted_inds]    
-        # mag_z_sorted = np.array(mag_z)[imu_time_sorted_inds]    
-        # gyro_x_sorted = np.array(gyro_x)[imu_time_sorted_inds]    
-        # gyro_y_sorted = np.array(gyro_y)[imu_time_sorted_inds]    
-        # gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]    
+        print(imu_time_sorted.shape)
+        print(len(inds_in_mission))
+        # Sort Indices to be within the mission time frame using the indices sorted above
+        imu_time_sorted_in_mission = imu_time_sorted[inds_in_mission]
+        accel_x_sorted_in_mission = accel_x_sorted[inds_in_mission]
+        accel_y_sorted_in_mission = accel_y_sorted[inds_in_mission]
+        accel_z_sorted_in_mission = accel_z_sorted[inds_in_mission]
+        mag_x_sorted_in_mission = mag_x_sorted[inds_in_mission]    
+        mag_y_sorted_in_mission = mag_y_sorted[inds_in_mission]    
+        mag_z_sorted_in_mission = mag_z_sorted[inds_in_mission]    
+        gyro_x_sorted_in_mission = gyro_x_sorted[inds_in_mission]    
+        gyro_y_sorted_in_mission = gyro_y_sorted[inds_in_mission]    
+        gyro_z_sorted_in_mission = gyro_z_sorted[inds_in_mission]    
 
         # Create IMU dimensions and write data to netCDF file
         # Create imu time dimension
-        imu_time_dim = imugrp.createDimension('time', imu_time_sorted.shape[0])
+        imu_time_dim = imugrp.createDimension('time', len(imu_time_sorted_in_mission))
 
         # IMU Time Variable
         imu_time_nc = imugrp.createVariable('time', 'f8', ('time',))
         imu_time_nc.units = "hours since 1970-01-01 00:00:00"
         imu_time_nc.calendar = "gregorian"
-        imu_time_num = nc.date2num(imu_time_sorted, units=imu_time_nc.units,calendar=imu_time_nc.calendar)
+        imu_time_num = nc.date2num(imu_time_sorted_in_mission, units=imu_time_nc.units,calendar=imu_time_nc.calendar)
         imu_time_nc[:] = imu_time_num
 
         # Accelerations
         accel_x_nc = imugrp.createVariable('accel_x', 'f8', ('time',))
         accel_x_nc.units = 'm/s^2'
-        accel_x_nc[:] = accel_x_sorted
+        accel_x_nc[:] = accel_x_sorted_in_mission
         accel_y_nc = imugrp.createVariable('accel_y', 'f8', ('time',))
         accel_y_nc.units = 'm/s^2'
-        accel_y_nc[:] = accel_y_sorted
+        accel_y_nc[:] = accel_y_sorted_in_mission
         accel_z_nc = imugrp.createVariable('accel_z', 'f8', ('time',))
         accel_z_nc.units = 'm/s^2'
-        accel_z_nc[:] = accel_z_sorted
+        accel_z_nc[:] = accel_z_sorted_in_mission
 
         # Magnetometer
         mag_x_nc = imugrp.createVariable('mag_x', 'f8', ('time',))
         mag_x_nc.units = 'uTeslas'
-        mag_x_nc[:] = mag_x_sorted
+        mag_x_nc[:] = mag_x_sorted_in_mission
         mag_y_nc = imugrp.createVariable('mag_y', 'f8', ('time',))
         mag_y_nc.units = 'uTeslas'
-        mag_y_nc[:] = mag_y_sorted
+        mag_y_nc[:] = mag_y_sorted_in_mission
         mag_z_nc = imugrp.createVariable('mag_z', 'f8', ('time',))
         mag_z_nc.units = 'uTeslas'
-        mag_z_nc[:] = mag_z_sorted
+        mag_z_nc[:] = mag_z_sorted_in_mission
 
         # Gyroscope
         gyro_x_nc = imugrp.createVariable('gyro_x', 'f8', ('time',))
         gyro_x_nc.units = 'degrees/sec'
-        gyro_x_nc[:] = gyro_x_sorted
+        gyro_x_nc[:] = gyro_x_sorted_in_mission
         gyro_y_nc = imugrp.createVariable('gyro_y', 'f8', ('time',))
         gyro_y_nc.units = 'degrees/sec'
-        gyro_y_nc[:] = gyro_y_sorted
+        gyro_y_nc[:] = gyro_y_sorted_in_mission
         gyro_z_nc = imugrp.createVariable('gyro_z', 'f8', ('time',))
         gyro_z_nc.units = 'degrees/sec'
-        gyro_z_nc[:] = gyro_z_sorted
+        gyro_z_nc[:] = gyro_z_sorted_in_mission
 
         # ------ GPS Data Read-in ------
         # Create GPS sub group
@@ -310,10 +315,11 @@ def main():
         current_ind = 0
         inds_in_mission = []
         for time in gps_time_sorted:
-            current_ind += 1
             if time >= start_time and time <= end_time:
                 inds_in_mission.append(current_ind)
+                current_ind += 1
             else:
+                current_ind += 1
                 continue
         
         print(gps_time_sorted.shape)
