@@ -136,7 +136,7 @@ microSWIFT_data/
 
 # Ignore photos and videos
 PhotosVideos/
-
+microSWIFT_telemetry/
 
 # Ignore virtual environment
  bin/
