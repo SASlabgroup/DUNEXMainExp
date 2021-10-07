@@ -119,18 +119,12 @@ def main():
                     else:
                         continue
 
-        # Sort the time to be within the mission time window from the notes spreadsheet
-        imu_time_in_mission = []
-        for time in imu_time:
-            if time >= start_time and time <= end_time:
-                imu_time_in_mission.append(time)
-            else:
-                continue
-
         # Sort each list based on time before saving so that each data point is in chronological order
-        imu_time_in_mission = np.array(imu_time_in_mission)
-        imu_time_sorted_inds = imu_time_in_mission.argsort()
-        imu_time_sorted = imu_time_in_mission[imu_time_sorted_inds]
+        imu_time = np.array(imu_time)
+        imu_time_sorted_inds = imu_time.argsort()
+
+        # Sort the time and data based on sorting the time indices
+        imu_time_sorted = imu_time[imu_time_sorted_inds]
         accel_x_sorted = np.array(accel_x)[imu_time_sorted_inds]
         accel_y_sorted = np.array(accel_y)[imu_time_sorted_inds]
         accel_z_sorted = np.array(accel_z)[imu_time_sorted_inds]
@@ -139,7 +133,27 @@ def main():
         mag_z_sorted = np.array(mag_z)[imu_time_sorted_inds]    
         gyro_x_sorted = np.array(gyro_x)[imu_time_sorted_inds]    
         gyro_y_sorted = np.array(gyro_y)[imu_time_sorted_inds]    
-        gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]    
+        gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]  
+
+        # # Sort the time to be within the mission time window from the notes spreadsheet
+        # imu_time_in_mission = []
+        # for time in imu_time_sorted:
+        #     if time >= start_time and time <= end_time:
+        #         imu_time_in_mission.append(time)
+        #     else:
+        #         continue
+
+ 
+        # imu_time_sorted = imu_time_in_mission[imu_time_sorted_inds]
+        # accel_x_sorted = np.array(accel_x)[imu_time_sorted_inds]
+        # accel_y_sorted = np.array(accel_y)[imu_time_sorted_inds]
+        # accel_z_sorted = np.array(accel_z)[imu_time_sorted_inds]
+        # mag_x_sorted = np.array(mag_x)[imu_time_sorted_inds]    
+        # mag_y_sorted = np.array(mag_y)[imu_time_sorted_inds]    
+        # mag_z_sorted = np.array(mag_z)[imu_time_sorted_inds]    
+        # gyro_x_sorted = np.array(gyro_x)[imu_time_sorted_inds]    
+        # gyro_y_sorted = np.array(gyro_y)[imu_time_sorted_inds]    
+        # gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]    
 
         # Create IMU dimensions and write data to netCDF file
         # Create imu time dimension
@@ -312,27 +326,27 @@ def main():
         z_sorted_in_mission = z_sorted[inds_in_mission]
 
         # Save GPS data to netCDF file
-        gps_time_dim = gpsgrp.createDimension('time', len(gps_time_sorted))
+        gps_time_dim = gpsgrp.createDimension('time', len(gps_time_in_mission))
 
         # GPS Time Variable
         gps_time_nc = gpsgrp.createVariable('time', 'f8', ('time',))
         gps_time_nc.units = "hours since 1970-01-01 00:00:00"
         gps_time_nc.calendar = "standard"
-        gps_time_num = nc.date2num(gps_time_sorted, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
+        gps_time_num = nc.date2num(gps_time_in_mission, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
         gps_time_nc[:] = gps_time_num
 
         # Locations
         lat_nc = gpsgrp.createVariable('lat', 'f8', ('time',))
         lat_nc.units = 'degrees_north'
-        lat_nc[:] = lat_sorted
+        lat_nc[:] = lat_sorted_in_mission
         lon_nc = gpsgrp.createVariable('lon', 'f8', ('time',))
         lon_nc.units = 'degrees_east'
-        lon_nc[:] = lon_sorted
+        lon_nc[:] = lon_sorted_in_mission
         z_nc = gpsgrp.createVariable('z', 'f8', ('time',))
-        z_nc[:] = z_sorted
+        z_nc[:] = z_sorted_in_mission
 
         # Compute FRF x and y locations 
-        x, y = microSWIFTTools.transform2FRF(lat=lat_sorted, lon=lon_sorted)
+        x, y = microSWIFTTools.transform2FRF(lat=lat_sorted_in_mission, lon=lon_sorted_in_mission)
         x_frf_nc = gpsgrp.createVariable('x_frf', 'f8', ('time',))
         x_frf_nc.units = 'meters'
         x_frf_nc[:] = x
@@ -342,7 +356,7 @@ def main():
         
         # Interpolate times from GPGGA time to the GPVTG time
         # gps_time_num_notsorted = cftime.date2num(gps_time, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
-        extrap_func = interpolate.interp1d(gps_time_linenum, gps_time_num, fill_value='extrapolate')
+        extrap_func = interpolate.interp1d(gps_time_linenum_in_mission, gps_time_num, fill_value='extrapolate')
         gps_vel_time = extrap_func(vel_linenum)
 
         # Sort GPS velocites based on gps time
