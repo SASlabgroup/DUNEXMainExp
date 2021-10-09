@@ -141,6 +141,9 @@ microSWIFT_telemetry/
 # Ignore GarminTracker_data
 GarminTracker_data/ 
 
+# Ignore the CDIP data
+CDIP/
+
 # Ignore virtual environment
  bin/
  etc/
