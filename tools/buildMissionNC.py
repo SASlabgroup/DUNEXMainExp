@@ -299,12 +299,15 @@ def main():
                                 lon.append(gpgga.longitude)
                         elif "GPVTG" in line:
                             linenum += 1
-                            if gpgga.gps_qual < 1:
+                            gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
+                            try:
+                                if type(gpvtg.spd_over_grnd_kmph) == float:
+                                    vel_linenum.append(linenum)
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
+                            except:
                                 continue
-                            vel_linenum.append(linenum)
-                            gpvtg = pynmea2.parse(line,check=True)   #grab gpvtg sentence
-                            u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
-                            v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
+                               
                         else: #if not GPGGA or GPVTG, continue to start of loop
                             linenum += 1
                             continue
