@@ -138,6 +138,9 @@ microSWIFT_data/
 PhotosVideos/
 microSWIFT_telemetry/
 
+# Ignore GarminTracker_data
+GarminTracker_data/ 
+
 # Ignore virtual environment
  bin/
  etc/
