@@ -33,46 +33,63 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
     ax.contourf(xFRF_grid, yFRF_grid, bathy, cmap='gray')
 
     # Sort time labels 
-    min_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][0]
-    max_time_label = mission_dataset[microSWIFTs_on_mission[0]]['GPS']['time'][-1]
+    initial_values_set = False
+    while initial_values_set == False:
+        for microSWIFT in microSWIFTs_on_mission:
+            if 'GPS' in list(mission_dataset[microSWIFT].groups.keys()):
+                if 'time' in list(mission_dataset[microSWIFT]['GPS'].variables):
+                    # Set initial time labels
+                    min_time_label = mission_dataset[microSWIFT]['GPS']['time'][0]
+                    max_time_label = mission_dataset[microSWIFT]['GPS']['time'][-1]
 
-    # Sort x and y locations for map  
-    x, y = transform2FRF(mission_dataset[microSWIFTs_on_mission[0]]['GPS']['lat'], mission_dataset[microSWIFTs_on_mission[0]]['GPS']['lon']) 
-    min_x = np.min(x)
-    max_x = np.max(x)
-    min_y = np.min(y)
-    max_y = np.max(y)
-
+                    # Sort x and y locations for map  
+                    x, y = transform2FRF(mission_dataset[microSWIFT]['GPS']['lat'], mission_dataset[microSWIFT]['GPS']['lon']) 
+                    min_x = np.min(x)
+                    max_x = np.max(x)
+                    min_y = np.min(y)
+                    max_y = np.max(y)
+                    initial_values_set = True
+                else:
+                    continue
+            else:
+                continue
+                
     for microSWIFT in microSWIFTs_on_mission:
         # Compute local coordinates from each lat-lon series
-        x, y = transform2FRF(lat=mission_dataset[microSWIFT]['GPS']['lat'][:], lon=mission_dataset[microSWIFT]['GPS']['lon'][:])
+        if 'GPS' in list(mission_dataset[microSWIFT].groups.keys()):
+            if 'lat' and 'lon' in list(mission_dataset[microSWIFT]['GPS'].variables):
+                # Transform the coordinates to the FRF coordinates
+                x, y = transform2FRF(lat=mission_dataset[microSWIFT]['GPS']['lat'][:], lon=mission_dataset[microSWIFT]['GPS']['lon'][:])
 
-        # Plot the lat-lon map with color coded points in time
-        map = ax.scatter(x, y, c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
-        # reset time labels for colormap 
-        if mission_dataset[microSWIFT]['GPS']['time'][0] < min_time_label:
-            min_time_label = mission_dataset[microSWIFT]['GPS']['time'][0]
-        if mission_dataset[microSWIFT]['GPS']['time'][-1] > max_time_label:
-            max_time_label = mission_dataset[microSWIFT]['GPS']['time'][-1]
-        # Set max and min position
-        if np.min(x) < min_x:
-            min_x = np.min(x)
-        if np.max(x) > max_x:
-            max_x = np.max(x)
-        if np.min(y) < min_y:
-            min_y = np.min(y)
-        if np.max(y) > max_y:
-            max_y = np.max(y)
-        
+                # Plot the lat-lon map with color coded points in time
+                map = ax.scatter(x, y, c=mission_dataset[microSWIFT]['GPS']['time'][:], cmap='plasma')
+                # reset time labels for colormap 
+                if mission_dataset[microSWIFT]['GPS']['time'][0] < min_time_label:
+                    min_time_label = mission_dataset[microSWIFT]['GPS']['time'][0]
+                if mission_dataset[microSWIFT]['GPS']['time'][-1] > max_time_label:
+                    max_time_label = mission_dataset[microSWIFT]['GPS']['time'][-1]
+                # Set max and min position
+                if np.min(x) < min_x:
+                    min_x = np.min(x)
+                if np.max(x) > max_x:
+                    max_x = np.max(x)
+                if np.min(y) < min_y:
+                    min_y = np.min(y)
+                if np.max(y) > max_y:
+                    max_y = np.max(y)
+                
+                # Figure Properties
+                time_labels = cftime.num2pydate([min_time_label, max_time_label],units=mission_dataset[microSWIFT]['GPS']['time'].units, calendar=mission_dataset[microSWIFT]['GPS']['time'].calendar)
+            
     # Set colorbar and figure properties
     cbar = fig.colorbar(map, ax=ax, ticks=[min_time_label, max_time_label])
     map.set_clim([min_time_label, max_time_label])
     ax.set_xlim([min_x, max_x])
     ax.set_ylim([min_y, max_y])
     cbar.ax.set_xlabel('Time [UTC]')
-    time_labels = cftime.num2pydate([min_time_label, max_time_label],units=mission_dataset[microSWIFT]['GPS']['time'].units, calendar=mission_dataset[microSWIFT]['GPS']['time'].calendar)
     time_labels = [time_labels[0].strftime('%Y-%m-%d %H:%M'), time_labels[1].strftime('%Y-%m-%d %H:%M')]
     cbar.ax.set_yticklabels(time_labels, rotation=0, va='center')
+
     plt.tight_layout()
     ax.set_aspect('equal')
     figure_path = mission_dir_path + 'mission_{}_map.png'.format(mission_num)
