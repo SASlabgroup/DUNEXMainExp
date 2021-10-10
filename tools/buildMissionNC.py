@@ -236,9 +236,9 @@ def main():
                     for line in file:
                         if "GPGGA" in line:
                             linenum += 1
-                            gpgga = pynmea2.parse(line)   #grab gpgga sentence and parse
                             #check to see if we have lost GPS fix
                             try:
+                                gpgga = pynmea2.parse(line)   #grab gpgga sentence and parse
                                 if gpgga.gps_qual < 1:
                                     continue
                             except:
