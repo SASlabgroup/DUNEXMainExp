@@ -75,6 +75,7 @@ PyLaTeX==1.4.1
 PyMPL==1.2.1
 pynmea2==1.18.0
 pyparsing==2.4.7
+pyproj==3.2.1
 pyrsistent==0.18.0
 pytest==6.2.5
 pytest-cov==2.12.1
