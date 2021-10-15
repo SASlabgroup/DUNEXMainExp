@@ -62,7 +62,7 @@ def main():
     print('Backing up data in {0} on local machine to {1} on bigwaves'.format(microSWIFT_data_dir, backup_dir))
 
     # rsync directory
-    backup_process = subprocess.run(['sshpass', '-p', password, 'rsync', '-avz', '--log-file={}'.format(log_name), microSWIFT_data_dir,'{0}@{1}:{2}'.format(username, bigwaves, backup_dir)]) 
+    backup_process = subprocess.run(['sshpass', '-p', password, 'rsync', '-avz', '--exclude', '*.nc', '--log-file={}'.format(log_name), microSWIFT_data_dir,'{0}@{1}:{2}'.format(username, bigwaves, backup_dir)]) 
     backup_process_rc = backup_process.returncode
     if backup_process_rc == 0:
         print('Data was successfully synced from local machine to bigwaves')
