@@ -144,6 +144,9 @@ GarminTracker_data/
 # Ignore the CDIP data
 CDIP/
 
+# Ignore Drone_Images
+Drone_Images/
+
 # Ignore virtual environment
  bin/
  etc/
