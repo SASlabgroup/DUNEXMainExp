@@ -194,3 +194,6 @@ analysis/Figures/wave-parameter-scatter-color.png
 analysis/Figures/wave-parameter-scatter.png
 analysis/Figures/wave-parameter-time-series.png
 analysis/Figures/
+
+# Ignore GoPros
+GoPros/
