@@ -1,9 +1,14 @@
 ## Building Mission 20 Data
+# Import Statements
+import numpy as np
+import pandas as pd
+import datetime
 import sys
-sys.path.append('/Volumes/DUNEX/DUNEXMainExp/')
+sys.path.append('..')
 
 # Import Dataset tools
-from tools.datasetTools import buildBasicMissionNC
+from tools import buildBasicMissionNC
+from tools import microSWIFTTools
 
 def main():
     '''
@@ -13,18 +18,36 @@ def main():
     experiment.
 
     '''
-
-    # 0: Define basic values 
+    # ---------- Step 0: Define basic values ------------
     mission_num = 20
-    start_time = 'start'
-    end_time = 'end'
+    
+    # Define Project Directory 
+    project_dir = '../'
+
+    # Define Data Directory
+    data_dir = 'microSWIFT_data/'
+
+    # Define Metadata Excel sheet name
+    metadata_name = 'DUNEXMainExp_notes.xlsx'
+
+    # Combine file name and project Directory
+    metadata_filename = project_dir + metadata_name
+
+    # Create dataframe object from DUNEX MetaData SpreadSheet
+    dunex_xlsx = pd.read_excel(metadata_filename)
+
+    # Get start and end times
+    start_time = datetime.datetime.fromisoformat(dunex_xlsx['Start Time'].iloc[mission_num])
+    end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
    
-    buildBasicMissionNC.mission_nc() 
+    # ---------- Step 1: Build Basic netCDF file from mission microSWIFT data ------------
+    buildBasicMissionNC.main(mission_num=mission_num)
 
-    # 1: Read in Raw microSWIFT data and build initial netCDF file
-    # mission_data_io(mission_num)
+    # Match GPS time steps 
 
-    # 2: Automated Cleaning of Dataset
+    # Match IMU time steps
+
+    # ---------- Step 2: Automated Cleaning of Dataset ------------
     # microSWIFT_in_water(mission_num)
     # despike_microSWIFT_data(mission_num)
 
