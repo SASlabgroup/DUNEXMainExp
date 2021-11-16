@@ -1,17 +1,19 @@
 # Build microSWIFT netCDF data structure from raw text data files
 # Import statements
-from netCDF4 import Dataset
 import netCDF4 as nc
 from scipy import interpolate
 import datetime
 import glob
 import numpy as np
 import pynmea2
-import cftime
-import microSWIFTTools
 import pandas as pd
+import sys
 
-def main():
+# Import local Modules
+sys.path.append('..')
+from tools import microSWIFTTools
+
+def main(mission_num=0):
     '''
     @edwinrainville
 
@@ -36,19 +38,25 @@ def main():
     dunex_xlsx = pd.read_excel(metadata_filename)
 
     # Define Mission Number
-    # User input for mission number 
-    mission_num = int(input('Enter Mission Number: '))
+    # User input for mission number if not provided intially 
+    if mission_num == 0:
+        mission_num = int(input('Enter Mission Number: '))
+    
+    # Define Mission Directory 
     mission_dir = 'mission_{}/'.format(mission_num)
+
+    # Define cleaned dataset directory
+    cleaned_data_dir = 'cleanedDataset/'
 
     # Get start and end times
     start_time = datetime.datetime.fromisoformat(dunex_xlsx['Start Time'].iloc[mission_num])
     end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
 
     # Define netCDF filename and path
-    ncfile_name = project_dir + data_dir + mission_dir + 'mission_{}.nc'.format(mission_num)
+    ncfile_name = project_dir + data_dir + cleaned_data_dir + 'mission_{}.nc'.format(mission_num)
 
     # Open netCDF dataset
-    rootgrp = Dataset(ncfile_name, 'w', clobber=True)
+    rootgrp = nc.Dataset(ncfile_name, 'w', clobber=True)
 
     # Add sampling frequency information to the netcdf file
     single_val_dim = rootgrp.createDimension('single_value', 1)
@@ -106,6 +114,7 @@ def main():
                 for line in lines:
                     values = line.split(',')
                     if len(values) == 10:
+                        # Add in section to check time value and add in microseconds that are not recorded - assume they are evenly spaced
                         imu_time.append(datetime.datetime.fromisoformat(values[0]))
                         accel_x.append(float(values[1]))
                         accel_y.append(float(values[2]))
@@ -373,7 +382,6 @@ def main():
             y_frf_nc[:] = y
             
             # Interpolate times from GPGGA time to the GPVTG time
-            # gps_time_num_notsorted = cftime.date2num(gps_time, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
             extrap_func = interpolate.interp1d(gps_time_linenum_in_mission, gps_time_num, fill_value='extrapolate')
             gps_vel_time = extrap_func(vel_linenum)
 
