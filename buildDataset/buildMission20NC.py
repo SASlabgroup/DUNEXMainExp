@@ -41,9 +41,11 @@ def main():
     end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
    
     # ---------- Step 1: Build Basic netCDF file from mission microSWIFT data ------------
+    # Build a netCDF for the mission that has only raw time values read in 
     buildBasicMissionNC.main(mission_num=mission_num)
 
     # Match GPS time steps 
+
 
     # Match IMU time steps
 
