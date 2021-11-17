@@ -1,0 +1,32 @@
+Outline for Data Paper on DUNEX Data
+
+1. Introduction 
+    a. Literature Review on Similar types of datasets
+
+2. Sampling Strategy and Measurements
+    a. GPS 
+    b. IMU 
+    c. FRF data products
+
+3. Conditions Sampled
+    a. Plot of wave parameters sampled based on CDIP Buoy 
+    b. Wind Parameters from FRF 
+    c. Conditions computed from microSWIFTs
+
+4. Data Quality Methods, Cleaning and Organizing
+    a. Figuring out when each microSWIFT is in the water
+    b. Computing Sea Surface Height
+    c. Computing Wave Parameters
+    d. Breaking locations 
+    e.Spatila and Temporal Organization
+
+4. Data Comparisons
+    a. Wave breaking - Argus and microSWIFTs
+
+5. Data Availability
+    a. Where and how is it stored
+
+6. Summary
+
+
+** Goal length: 20 pages 
