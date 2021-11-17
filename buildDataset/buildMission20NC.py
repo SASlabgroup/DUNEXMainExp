@@ -2,6 +2,7 @@
 # Import Statements
 import numpy as np
 import pandas as pd
+import netCDF4 as nc
 import datetime
 import sys
 sys.path.append('..')
@@ -42,7 +43,17 @@ def main():
    
     # ---------- Step 1: Build Basic netCDF file from mission microSWIFT data ------------
     # Build a netCDF for the mission that has only raw time values read in 
-    buildBasicMissionNC.main(mission_num=mission_num)
+    mission_nc_path = buildBasicMissionNC.main(mission_num=mission_num)
+
+    # For development add a path directly so it doesnt need to load each time 
+    mission_nc_path = '../microSWIFT_data/cleanedDataset/mission_20.nc'
+
+    # Open netCDF to start cleaning
+    mission_dataset = nc.Dataset(mission_nc_path, mode='a')
+
+    # Get list of all microSWIFTs on the mission
+    microSWIFTs_on_mission = list(mission_dataset.groups.keys())
+    print(mission_dataset)
 
     # Match GPS time steps 
 
@@ -66,6 +77,8 @@ def main():
 
     # 8: Save all cleaned data into netCDF structure
     
+    # Close the dataset 
+    mission_dataset.close()
 
 # Run the Script
 if __name__=='__main__':
