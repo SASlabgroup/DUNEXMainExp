@@ -8,6 +8,7 @@ import numpy as np
 import pynmea2
 import pandas as pd
 import sys
+import matplotlib.pyplot as plt
 
 # Import local Modules
 sys.path.append('..')
@@ -17,8 +18,13 @@ def main(mission_num=0):
     '''
     @edwinrainville
 
+    TODO: Finish writing docstring
     Description: This script takes all the raw offloaded microSWIFT data and loads it in to a well organized and formatted 
                 netCDF file that can then be easily analyzed for each mission.
+
+    TODO: write version history
+    Versions:
+    1.0.0 - 
 
     '''
 
@@ -67,6 +73,16 @@ def main(mission_num=0):
     imu_freq[:] = 12
     imu_freq.units = 'Hz'
 
+    # Make mission time array and save to root group
+    imu_time_step = datetime.timedelta(seconds=(1/imu_freq[0]))
+    mission_time = np.arange(start_time, end_time, imu_time_step).astype(datetime.datetime)
+    mission_time_dim = rootgrp.createDimension('time', len(mission_time))
+    mission_time_nc = rootgrp.createVariable('time', 'f8', ('time',))
+    mission_time_nc.units = "hours since 1970-01-01 00:00:00"
+    mission_time_nc.calendar = "gregorian"
+    mission_time_num = nc.date2num(mission_time, units=mission_time_nc.units,calendar=mission_time_nc.calendar)
+    mission_time_nc[:] = mission_time_num
+
     # Define microSWIFT num
     microSWIFT_dir_list = glob.glob(project_dir + data_dir + mission_dir + 'microSWIFT_*')
 
@@ -79,17 +95,11 @@ def main(mission_num=0):
             microSWIFT_num = int(microSWIFT_num[1:])
         else:
             microSWIFT_num = int(microSWIFT_num)
-        
-
-        print(microSWIFT_num)
 
         # Create netcdf group for microSWIFT
         microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
         # ------ IMU Data Read-in ------
-        # Create IMU sub group
-        imugrp = microSWIFTgroup.createGroup('IMU')
-
         # Get list of all IMU files
         imu_file_list = glob.glob(microSWIFT_dir + '/*IMU*')
 
@@ -114,7 +124,7 @@ def main(mission_num=0):
                 for line in lines:
                     values = line.split(',')
                     if len(values) == 10:
-                        # Add in section to check time value and add in microseconds that are not recorded - assume they are evenly spaced
+                        # Read-In values from the IMU data files
                         imu_time.append(datetime.datetime.fromisoformat(values[0]))
                         accel_x.append(float(values[1]))
                         accel_y.append(float(values[2]))
@@ -130,6 +140,8 @@ def main(mission_num=0):
 
         # Sort each list based on time before saving so that each data point is in chronological order
         imu_time = np.array(imu_time)
+
+        # Sort the time values 
         imu_time_sorted_inds = imu_time.argsort()
 
         # Sort the time and data based on sorting the time indices
@@ -170,58 +182,91 @@ def main(mission_num=0):
             gyro_y_sorted_in_mission = gyro_y_sorted[inds_in_mission]    
             gyro_z_sorted_in_mission = gyro_z_sorted[inds_in_mission]    
 
-            # Create IMU dimensions and write data to netCDF file
-            # Create imu time dimension
-            imu_time_dim = imugrp.createDimension('time', len(imu_time_sorted_in_mission))
 
-            # IMU Time Variable
-            imu_time_nc = imugrp.createVariable('time', 'f8', ('time',))
-            imu_time_nc.units = "hours since 1970-01-01 00:00:00"
-            imu_time_nc.calendar = "gregorian"
-            imu_time_num = nc.date2num(imu_time_sorted_in_mission, units=imu_time_nc.units,calendar=imu_time_nc.calendar)
-            imu_time_nc[:] = imu_time_num
+            # Add in fraction of second of sampling frequency to each time value
+            imu_time_with_millisecond = imu_time_sorted_in_mission.copy()
+            i = 1
+            for n in np.arange(1, len(imu_time_sorted_in_mission)):
+                if imu_time_sorted_in_mission[n] == imu_time_sorted_in_mission[n-1]: 
+                    if i < 13:
+                        imu_time_with_millisecond[n] = imu_time_sorted_in_mission[n] + (i * imu_time_step) 
+                        i += 1
+                    else: 
+                        # Reset n at the top of the new second
+                        i = 1
+                else:
+                    # Zero out i so that it can start again on the next second 
+                    i = 1 
+            
+            # Map each index in the imu time series to an index in the overall time series
+            mission_time_index_for_imu_value = [] 
+            for n in np.arange(len(imu_time_with_millisecond)):
+                mission_time_index_for_imu_value.append(int(np.argmin(mission_time - imu_time_with_millisecond[n])))
 
+            # Make NaN vectors on mission_time for each variable and fill with values from the actual measurements
             # Accelerations
-            accel_x_nc = imugrp.createVariable('accel_x', 'f8', ('time',))
-            accel_x_nc.units = 'm/s^2'
-            accel_x_nc[:] = accel_x_sorted_in_mission
-            accel_y_nc = imugrp.createVariable('accel_y', 'f8', ('time',))
-            accel_y_nc.units = 'm/s^2'
-            accel_y_nc[:] = accel_y_sorted_in_mission
-            accel_z_nc = imugrp.createVariable('accel_z', 'f8', ('time',))
-            accel_z_nc.units = 'm/s^2'
-            accel_z_nc[:] = accel_z_sorted_in_mission
+            accel_x_mission = np.nan * np.ones(len(mission_time))
+            accel_x_mission[mission_time_index_for_imu_value] = accel_x_sorted_in_mission
+            accel_y_mission = np.nan * np.ones(len(mission_time))
+            accel_y_mission[mission_time_index_for_imu_value] = accel_y_sorted_in_mission
+            accel_z_mission = np.nan * np.ones(len(mission_time))
+            accel_z_mission[mission_time_index_for_imu_value] = accel_z_sorted_in_mission
 
             # Magnetometer
-            mag_x_nc = imugrp.createVariable('mag_x', 'f8', ('time',))
-            mag_x_nc.units = 'uTeslas'
-            mag_x_nc[:] = mag_x_sorted_in_mission
-            mag_y_nc = imugrp.createVariable('mag_y', 'f8', ('time',))
-            mag_y_nc.units = 'uTeslas'
-            mag_y_nc[:] = mag_y_sorted_in_mission
-            mag_z_nc = imugrp.createVariable('mag_z', 'f8', ('time',))
-            mag_z_nc.units = 'uTeslas'
-            mag_z_nc[:] = mag_z_sorted_in_mission
+            mag_x_mission = np.nan * np.ones(len(mission_time))
+            mag_x_mission[mission_time_index_for_imu_value] = mag_x_sorted_in_mission
+            mag_y_mission = np.nan * np.ones(len(mission_time))
+            mag_y_mission[mission_time_index_for_imu_value] = mag_y_sorted_in_mission
+            mag_z_mission = np.nan * np.ones(len(mission_time))
+            mag_z_mission[mission_time_index_for_imu_value] = mag_z_sorted_in_mission
 
             # Gyroscope
-            gyro_x_nc = imugrp.createVariable('gyro_x', 'f8', ('time',))
+            gyro_x_mission = np.nan * np.ones(len(mission_time))
+            gyro_x_mission[mission_time_index_for_imu_value] = gyro_x_sorted_in_mission
+            gyro_y_mission = np.nan * np.ones(len(mission_time))
+            gyro_y_mission[mission_time_index_for_imu_value] = gyro_y_sorted_in_mission
+            gyro_z_mission = np.nan * np.ones(len(mission_time))
+            gyro_z_mission[mission_time_index_for_imu_value] = gyro_z_sorted_in_mission
+
+            # Save the data to the microSWIFT group in the netCDF
+            # Accelerations
+            accel_x_nc = microSWIFTgroup.createVariable('accel_x', 'f8', ('time',))
+            accel_x_nc.units = 'm/s^2'
+            accel_x_nc[:] = accel_x_mission
+            accel_y_nc = microSWIFTgroup.createVariable('accel_y', 'f8', ('time',))
+            accel_y_nc.units = 'm/s^2'
+            accel_y_nc[:] = accel_y_mission
+            accel_z_nc = microSWIFTgroup.createVariable('accel_z', 'f8', ('time',))
+            accel_z_nc.units = 'm/s^2'
+            accel_z_nc[:] = accel_z_mission
+
+            # Magnetometer
+            mag_x_nc = microSWIFTgroup.createVariable('mag_x', 'f8', ('time',))
+            mag_x_nc.units = 'uTeslas'
+            mag_x_nc[:] = mag_x_mission
+            mag_y_nc = microSWIFTgroup.createVariable('mag_y', 'f8', ('time',))
+            mag_y_nc.units = 'uTeslas'
+            mag_y_nc[:] = mag_y_mission
+            mag_z_nc = microSWIFTgroup.createVariable('mag_z', 'f8', ('time',))
+            mag_z_nc.units = 'uTeslas'
+            mag_z_nc[:] = mag_z_mission
+
+            # Gyroscope
+            gyro_x_nc = microSWIFTgroup.createVariable('gyro_x', 'f8', ('time',))
             gyro_x_nc.units = 'degrees/sec'
-            gyro_x_nc[:] = gyro_x_sorted_in_mission
-            gyro_y_nc = imugrp.createVariable('gyro_y', 'f8', ('time',))
+            gyro_x_nc[:] = gyro_x_mission
+            gyro_y_nc = microSWIFTgroup.createVariable('gyro_y', 'f8', ('time',))
             gyro_y_nc.units = 'degrees/sec'
-            gyro_y_nc[:] = gyro_y_sorted_in_mission
-            gyro_z_nc = imugrp.createVariable('gyro_z', 'f8', ('time',))
+            gyro_y_nc[:] = gyro_y_mission
+            gyro_z_nc = microSWIFTgroup.createVariable('gyro_z', 'f8', ('time',))
             gyro_z_nc.units = 'degrees/sec'
-            gyro_z_nc[:] = gyro_z_sorted_in_mission
+            gyro_z_nc[:] = gyro_z_mission
 
         # If there isn't any points within the mission - skip it
         else:
             continue
 
         # ------ GPS Data Read-in ------
-        # Create GPS sub group
-        gpsgrp = microSWIFTgroup.createGroup('GPS')
-
         # Get list of all GPS files
         gps_file_list = glob.glob(microSWIFT_dir + '/*GPS*')
 
@@ -352,32 +397,36 @@ def main(mission_num=0):
             lon_sorted_in_mission = lon_sorted[inds_in_mission]
             z_sorted_in_mission = z_sorted[inds_in_mission]
 
-            # Save GPS data to netCDF file
-            gps_time_dim = gpsgrp.createDimension('time', len(gps_time_in_mission))
-
-            # GPS Time Variable
-            gps_time_nc = gpsgrp.createVariable('time', 'f8', ('time',))
-            gps_time_nc.units = "hours since 1970-01-01 00:00:00"
-            gps_time_nc.calendar = "standard"
-            gps_time_num = nc.date2num(gps_time_in_mission, units=gps_time_nc.units,calendar=gps_time_nc.calendar)
-            gps_time_nc[:] = gps_time_num
-
-            # Locations
-            lat_nc = gpsgrp.createVariable('lat', 'f8', ('time',))
+            # Interpolate each value onto the overall mission time
+            gps_time_num = nc.date2num(gps_time_in_mission, units="hours since 1970-01-01 00:00:00",calendar="standard") 
+            
+            # Latitude interpolation and saving to netCDF in the microSWIFT group
+            lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, fill_value='extrapolate')
+            lat_interpolated = lat_interp_func(mission_time_num)
+            lat_nc = microSWIFTgroup.createVariable('lat', 'f8', ('time',))
             lat_nc.units = 'degrees_north'
-            lat_nc[:] = lat_sorted_in_mission
-            lon_nc = gpsgrp.createVariable('lon', 'f8', ('time',))
+            lat_nc[:] = lat_interpolated
+
+            # Longitude interpolation and saving to netCDF in the microSWIFT group
+            lon_interp_func = interpolate.interp1d(gps_time_num, lon_sorted_in_mission, fill_value='extrapolate')
+            lon_interpolated = lon_interp_func(mission_time_num)
+            lon_nc = microSWIFTgroup.createVariable('lon', 'f8', ('time',))
             lon_nc.units = 'degrees_east'
-            lon_nc[:] = lon_sorted_in_mission
-            z_nc = gpsgrp.createVariable('z', 'f8', ('time',))
-            z_nc[:] = z_sorted_in_mission
+            lon_nc[:] = lon_interpolated
+
+            # GPS Elevation interpolation and saving to netCDF in the microSWIFT group
+            z_interp_func = interpolate.interp1d(gps_time_num, z_sorted_in_mission, fill_value='extrapolate')
+            z_interpolated = z_interp_func(mission_time_num)
+            z_nc = microSWIFTgroup.createVariable('gpsElevation', 'f8', ('time',))
+            z_nc.units = 'degrees_east'
+            z_nc[:] = z_interpolated
 
             # Compute FRF x and y locations 
-            x, y = microSWIFTTools.transform2FRF(lat=lat_sorted_in_mission, lon=lon_sorted_in_mission)
-            x_frf_nc = gpsgrp.createVariable('x_frf', 'f8', ('time',))
+            x, y = microSWIFTTools.transform2FRF(lat=lat_interpolated, lon=lon_interpolated)
+            x_frf_nc = microSWIFTgroup.createVariable('xFRF', 'f8', ('time',))
             x_frf_nc.units = 'meters'
             x_frf_nc[:] = x
-            y_frf_nc = gpsgrp.createVariable('y_frf', 'f8', ('time',))
+            y_frf_nc = microSWIFTgroup.createVariable('yFRF', 'f8', ('time',))
             y_frf_nc.units = 'meters'
             y_frf_nc[:] = y
             
@@ -392,22 +441,30 @@ def main(mission_num=0):
             u_sorted = np.array(u)[gps_vel_time_sorted_inds]
             v_sorted = np.array(v)[gps_vel_time_sorted_inds]
 
+            # Interpolate the GPS velocities onto the mission time array
+            gps_u_interp_func = interpolate.interp1d(gps_vel_time_sorted, u_sorted, fill_value='extrapolate')
+            gps_u_mission = gps_u_interp_func(mission_time_num)
+            gps_v_interp_func = interpolate.interp1d(gps_vel_time_sorted, v_sorted, fill_value='extrapolate')
+            gps_v_mission = gps_v_interp_func(mission_time_num)
+
+            # TODO: NaN out all values outside of measured GPS time
             # Add all GPS Velocity values to the mission netcdf file
-            gps_vel_time_dim = gpsgrp.createDimension('gps_velocity_time', len(vel_linenum))
-            gps_vel_time_nc = gpsgrp.createVariable('gps_vel_time', 'f8', ('gps_velocity_time',))
-            gps_vel_time_nc.units = "hours since 1970-01-01 00:00:00"
-            gps_vel_time_nc.calendar = "standard"
-            gps_vel_time_nc[:] = gps_vel_time
-            u_nc = gpsgrp.createVariable('u', 'f8', ('gps_velocity_time',))
+            u_nc = microSWIFTgroup.createVariable('u', 'f8', ('time',))
             u_nc.units = 'm/s'
-            u_nc[:] = u_sorted
-            v_nc = gpsgrp.createVariable('v', 'f8', ('gps_velocity_time',))
+            u_nc[:] = gps_u_mission
+            v_nc = microSWIFTgroup.createVariable('v', 'f8', ('time',))
             v_nc.units = 'm/s'
-            v_nc[:] = v_sorted
+            v_nc[:] = gps_v_mission
         
         # If there aren't any points in the mission time skip 
         else:
             continue
+        
+    # Close the dataset
+    rootgrp.close()
+
+    # Return the name of the netCDF that was created
+    return ncfile_name
 
 # Run the Script
 if __name__=='__main__':
