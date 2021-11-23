@@ -8,7 +8,6 @@ import numpy as np
 import pynmea2
 import pandas as pd
 import sys
-import matplotlib.pyplot as plt
 
 # Import local Modules
 sys.path.append('..')
@@ -117,7 +116,6 @@ def main(mission_num=0):
 
         # Loop through each file and read in data from each line 
         for file in imu_file_list:
-            print(file)
             with open(file) as f:
                 lines = f.readlines()
                 # Line Structure: timestamp, accel_x, accel_y, accel_z, mag_x, mag_y, mag_z, gyro_x, gyro_y, gyro_z
@@ -283,8 +281,6 @@ def main(mission_num=0):
 
         # Read in GPS data from each file in the GPS list
         for gps_file in gps_file_list:
-            print(gps_file)
-            
             with open(gps_file, 'r') as file:
                 
                     for line in file:
