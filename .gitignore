@@ -197,3 +197,4 @@ analysis/Figures/
 
 # Ignore GoPros
 GoPros/
+buildDataset/*.png
