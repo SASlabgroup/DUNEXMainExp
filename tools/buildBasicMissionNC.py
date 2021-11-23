@@ -201,12 +201,12 @@ def main(mission_num=0):
             # Map each index in the imu time series to an index in the overall time series
             mission_time_index_for_imu_value = [] 
             for n in np.arange(len(imu_time_with_millisecond)):
-                mission_time_index_for_imu_value.append(int(np.argmin(mission_time - imu_time_with_millisecond[n])))
+                mission_time_index_for_imu_value.append(int(np.argmin(np.abs(mission_time - imu_time_with_millisecond[n]))))
 
             # Make NaN vectors on mission_time for each variable and fill with values from the actual measurements
             # Accelerations
             accel_x_mission = np.nan * np.ones(len(mission_time))
-            accel_x_mission[mission_time_index_for_imu_value] = accel_x_sorted_in_mission
+            accel_x_mission[mission_time_index_for_imu_value] = accel_x_sorted_in_mission            
             accel_y_mission = np.nan * np.ones(len(mission_time))
             accel_y_mission[mission_time_index_for_imu_value] = accel_y_sorted_in_mission
             accel_z_mission = np.nan * np.ones(len(mission_time))
@@ -401,21 +401,21 @@ def main(mission_num=0):
             gps_time_num = nc.date2num(gps_time_in_mission, units="hours since 1970-01-01 00:00:00",calendar="standard") 
             
             # Latitude interpolation and saving to netCDF in the microSWIFT group
-            lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, fill_value='extrapolate')
+            lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
             lat_interpolated = lat_interp_func(mission_time_num)
             lat_nc = microSWIFTgroup.createVariable('lat', 'f8', ('time',))
             lat_nc.units = 'degrees_north'
             lat_nc[:] = lat_interpolated
 
             # Longitude interpolation and saving to netCDF in the microSWIFT group
-            lon_interp_func = interpolate.interp1d(gps_time_num, lon_sorted_in_mission, fill_value='extrapolate')
+            lon_interp_func = interpolate.interp1d(gps_time_num, lon_sorted_in_mission, bounds_error=False, fill_value='NaN')
             lon_interpolated = lon_interp_func(mission_time_num)
             lon_nc = microSWIFTgroup.createVariable('lon', 'f8', ('time',))
             lon_nc.units = 'degrees_east'
             lon_nc[:] = lon_interpolated
 
             # GPS Elevation interpolation and saving to netCDF in the microSWIFT group
-            z_interp_func = interpolate.interp1d(gps_time_num, z_sorted_in_mission, fill_value='extrapolate')
+            z_interp_func = interpolate.interp1d(gps_time_num, z_sorted_in_mission, bounds_error=False, fill_value='NaN')
             z_interpolated = z_interp_func(mission_time_num)
             z_nc = microSWIFTgroup.createVariable('gpsElevation', 'f8', ('time',))
             z_nc.units = 'degrees_east'
@@ -442,12 +442,11 @@ def main(mission_num=0):
             v_sorted = np.array(v)[gps_vel_time_sorted_inds]
 
             # Interpolate the GPS velocities onto the mission time array
-            gps_u_interp_func = interpolate.interp1d(gps_vel_time_sorted, u_sorted, fill_value='extrapolate')
+            gps_u_interp_func = interpolate.interp1d(gps_vel_time_sorted, u_sorted, bounds_error=False, fill_value='NaN')
             gps_u_mission = gps_u_interp_func(mission_time_num)
-            gps_v_interp_func = interpolate.interp1d(gps_vel_time_sorted, v_sorted, fill_value='extrapolate')
+            gps_v_interp_func = interpolate.interp1d(gps_vel_time_sorted, v_sorted, bounds_error=False, fill_value='NaN')
             gps_v_mission = gps_v_interp_func(mission_time_num)
 
-            # TODO: NaN out all values outside of measured GPS time
             # Add all GPS Velocity values to the mission netcdf file
             u_nc = microSWIFTgroup.createVariable('u', 'f8', ('time',))
             u_nc.units = 'm/s'
