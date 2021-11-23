@@ -1,27 +1,36 @@
-## Building Mission 20 Data
-# Import Statements
+## buildMission20NC.py - Build Mission 20 Cleaned netCDF
+# Import statements
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import netCDF4 as nc
-import datetime
+from scipy import signal
+from scipy import fft
+from scipy import interpolate
+from scipy import integrate
+import cftime
 import sys
-sys.path.append('..')
+import datetime
 
-# Import Dataset tools
+# Import DUNEX Tools
+sys.path.append('..')
 from tools import buildBasicMissionNC
+from tools import missionView
 from tools import microSWIFTTools
 
 def main():
     '''
     @edwinrainville
 
-    Description: This script builds and cleans the dataset for microSWIFT mission 20 from the DUNEX Main
-    experiment.
+    Description: Build and clean the mission 20 dataset.
+
 
     '''
-    # ---------- Step 0: Define basic values ------------
+
+    # Section 0: 
     mission_num = 20
-    
+
     # Define Project Directory 
     project_dir = '../'
 
@@ -40,46 +49,12 @@ def main():
     # Get start and end times
     start_time = datetime.datetime.fromisoformat(dunex_xlsx['Start Time'].iloc[mission_num])
     end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
-   
-    # ---------- Step 1: Build Basic netCDF file from mission microSWIFT data ------------
-    # Build a netCDF for the mission that has only raw time values read in 
+
+    # # Build a netCDF for the mission that has only raw time values read in 
     mission_nc_path = buildBasicMissionNC.main(mission_num=mission_num)
 
-    # For development add a path directly so it doesnt need to load each time 
-    mission_nc_path = '../microSWIFT_data/cleanedDataset/mission_20.nc'
+    # View the built mission netCDF
+    missionView.main(mission_nc_path)
 
-    # Open netCDF to start cleaning
-    mission_dataset = nc.Dataset(mission_nc_path, mode='a')
-
-    # Get list of all microSWIFTs on the mission
-    microSWIFTs_on_mission = list(mission_dataset.groups.keys())
-    print(mission_dataset)
-
-    # Match GPS time steps 
-
-
-    # Match IMU time steps
-
-    # ---------- Step 2: Automated Cleaning of Dataset ------------
-    # microSWIFT_in_water(mission_num)
-    # despike_microSWIFT_data(mission_num)
-
-    # 3: Manual Cleaning of Dataset with highly detailed notes
-
-    # 4: Compute Sea Surface Height from IMU and GPS data - This is an open question on how this will work 
-    # compute_sea_surface_elevation(mission_num)
-
-    # 5: Compute Wave Parameters - Hs, Tp, Dp, E(f) and E(f,theta) - This is an open question on how this will work 
-
-    # 6: Find all wave breaking locations - This is based on Adam Browns Paper in 2018 - may need to be adjusted 
-
-    # 7: Make spatial grid and organize all data into each grid cell spatially and in time - A grid will need to be decided
-
-    # 8: Save all cleaned data into netCDF structure
-    
-    # Close the dataset 
-    mission_dataset.close()
-
-# Run the Script
 if __name__=='__main__':
     main()
