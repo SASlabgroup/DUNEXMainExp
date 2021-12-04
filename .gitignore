@@ -198,3 +198,10 @@ analysis/Figures/
 # Ignore GoPros
 GoPros/
 buildDataset/*.png
+writing/._abstract.tex
+
+# Ignore all temp/ backgroud files
+._*
+
+# Ignore all pdfs
+*.pdf
