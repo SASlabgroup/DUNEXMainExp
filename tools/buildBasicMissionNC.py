@@ -26,9 +26,6 @@ def main(mission_num=0):
     1.0.0 - 
 
     '''
-    # Start timing function
-    tic = datetime.datetime.utcnow()
-
     # Define Project Directory 
     project_dir = '../'
 
@@ -278,7 +275,6 @@ def main(mission_num=0):
             # Read in GPS data from each file in the GPS list
             for gps_file in gps_file_list:
                 with open(gps_file, 'r') as file:
-                    
                         for line in file:
                             if "GPGGA" in line:
                                 linenum += 1
@@ -453,10 +449,6 @@ def main(mission_num=0):
 
     # Close the dataset
     rootgrp.close()
-
-    # End Timing
-    toc = datetime.datetime.utcnow()
-    print('Time to build was {}'.format(toc-tic))
 
     # Return the name of the netCDF that was created
     return ncfile_name
