@@ -23,21 +23,6 @@ def main():
     # Define number of missions
     number_of_missions = 81
     
-    # Define Project Directory 
-    project_dir = '../'
-
-    # Define Data Directory
-    data_dir = 'microSWIFT_data/'
-
-    # Define Metadata Excel sheet name
-    metadata_name = 'DUNEXMainExp_notes.xlsx'
-
-    # Combine file name and project Directory
-    metadata_filename = project_dir + metadata_name
-
-    # Create dataframe object from DUNEX MetaData SpreadSheet
-    dunex_xlsx = pd.read_excel(metadata_filename)
-
     # Loop through each mission and build netCDF files
     for mission_num in np.arange(1, number_of_missions):
         # Build a netCDF for the mission that has only raw time values read in 
