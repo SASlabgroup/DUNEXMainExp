@@ -1,7 +1,6 @@
 ## buildMission20NC.py - Build Mission 20 Cleaned netCDF
 # Import statements
 import numpy as np
-import pandas as pd
 import sys
 import datetime
 import logging
