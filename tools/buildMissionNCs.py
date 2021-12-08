@@ -23,7 +23,7 @@ def main():
     number_of_missions = 81
     
     # Loop through each mission and build netCDF files
-    for mission_num in np.arange(1, number_of_missions):
+    for mission_num in np.arange(1, number_of_missions+1):
         # Build a netCDF for the mission that has only raw time values read in 
         logging.info('building mission {}'.format(mission_num))
         tic = datetime.datetime.utcnow()
