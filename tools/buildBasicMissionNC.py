@@ -95,8 +95,8 @@ def main(mission_num=0):
             microSWIFT_num = int(microSWIFT_num)
 
         # Check if there are both IMU and GPS files in the microSWIFT directory
-        imu_file_list = glob.glob(microSWIFT_dir + '/*IMU*')
-        gps_file_list = glob.glob(microSWIFT_dir + '/*GPS*')
+        imu_file_list = glob.glob(microSWIFT_dir + '/*IMU*.dat')
+        gps_file_list = glob.glob(microSWIFT_dir + '/*GPS*.dat')
         if (len(imu_file_list) > 0) and (len(gps_file_list) > 0):
             # Create netcdf group for microSWIFT
             microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
@@ -116,7 +116,7 @@ def main(mission_num=0):
 
             # Loop through each file and read in data from each line 
             for file in imu_file_list:
-                with open(file) as f:
+                with open(file, encoding="utf8", errors='ignore') as f:
                     lines = f.readlines()
                     # Line Structure: timestamp, accel_x, accel_y, accel_z, mag_x, mag_y, mag_z, gyro_x, gyro_y, gyro_z
                     for line in lines:
@@ -154,22 +154,32 @@ def main(mission_num=0):
             gyro_y_sorted = np.array(gyro_y)[imu_time_sorted_inds]    
             gyro_z_sorted = np.array(gyro_z)[imu_time_sorted_inds]  
 
+            # Add in fraction of second of sampling frequency to each time value
+            imu_time_with_millisecond = imu_time_sorted.copy()
+            i = 1
+            for n in np.arange(1, len(imu_time_sorted)):
+                if imu_time_sorted[n] == imu_time_sorted[n-1]: 
+                    imu_time_with_millisecond[n] = imu_time_sorted[n] + (i * imu_time_step) 
+                    i += 1
+                else:
+                    # Restart i at one so that it can start again on the next second 
+                    i = 1 
+
             # Sort the time to be within the mission time window from the notes spreadsheet
             current_ind = 0
             inds_in_mission = []
-            for time in imu_time_sorted:
+            for time in imu_time_with_millisecond:
                 if time >= start_time and time <= end_time:
                     inds_in_mission.append(current_ind)
                     current_ind += 1
                 else:
                     current_ind += 1
-                    continue
 
             # Check if there are any points within this time frame before trying to save them 
             if len(inds_in_mission) > 0:
 
                 # Sort Indices to be within the mission time frame using the indices sorted above
-                imu_time_sorted_in_mission = imu_time_sorted[inds_in_mission]
+                imu_time_sorted_in_mission = imu_time_with_millisecond[inds_in_mission]
                 accel_x_sorted_in_mission = accel_x_sorted[inds_in_mission]
                 accel_y_sorted_in_mission = accel_y_sorted[inds_in_mission]
                 accel_z_sorted_in_mission = accel_z_sorted[inds_in_mission]
@@ -180,23 +190,13 @@ def main(mission_num=0):
                 gyro_y_sorted_in_mission = gyro_y_sorted[inds_in_mission]    
                 gyro_z_sorted_in_mission = gyro_z_sorted[inds_in_mission]    
 
-
-                # Add in fraction of second of sampling frequency to each time value
-                imu_time_with_millisecond = imu_time_sorted_in_mission.copy()
-                i = 1
-                for n in np.arange(1, len(imu_time_sorted_in_mission)):
-                    if imu_time_sorted_in_mission[n] == imu_time_sorted_in_mission[n-1]: 
-                        imu_time_with_millisecond[n] = imu_time_sorted_in_mission[n] + (i * imu_time_step) 
-                        i += 1
-                    else:
-                        # Restart i at one so that it can start again on the next second 
-                        i = 1 
                 
                 # Map each index in the imu time series to an index in the overall time series
-                mission_time_index_for_imu_value = [] 
-                for n in np.arange(len(imu_time_with_millisecond)):
-                    mission_time_index_for_imu_value.append(int(np.argmin(np.abs(mission_time - imu_time_with_millisecond[n]))))
+                mission_time_index_for_imu_value = np.searchsorted(mission_time, imu_time_sorted_in_mission, side='right')
 
+                # If the last indexis the length of the array, replace it with the last index of the array
+                mission_time_index_for_imu_value[mission_time_index_for_imu_value >= len(mission_time)] = -1
+                
                 # Make NaN vectors on mission_time for each variable and fill with values from the actual measurements
                 # Accelerations
                 accel_x_mission = np.nan * np.ones(len(mission_time))
@@ -274,85 +274,85 @@ def main(mission_num=0):
 
             # Read in GPS data from each file in the GPS list
             for gps_file in gps_file_list:
-                with open(gps_file, 'r') as file:
-                        for line in file:
-                            if "GPGGA" in line:
-                                linenum += 1
-                                #check to see if we have lost GPS fix
-                                try:
-                                    gpgga = pynmea2.parse(line)   #grab gpgga sentence and parse
-                                    if gpgga.gps_qual < 1:
-                                        continue
-                                except:
+                with open(gps_file, encoding="utf8", errors='ignore') as file:
+                    for line in file:
+                        if "GPGGA" in line:
+                            linenum += 1
+                            #check to see if we have lost GPS fix
+                            try:
+                                gpgga = pynmea2.parse(line)   #grab gpgga sentence and parse
+                                if gpgga.gps_qual < 1:
                                     continue
-                                else:
-                                
-                                    # Create datetime from timestamp and file name
-                                    # Convert Month string to month num
-                                    month_str = gps_file[-21:-18]
-                                
-                                    # January
-                                    if month_str == 'Jan':
-                                        month_num = '01'
-                                    # February
-                                    if month_str == 'Feb':
-                                        month_num = '02'
-                                    # March
-                                    if month_str == 'Mar':
-                                        month_num = '03'
-                                    # April
-                                    if month_str == 'Apr':
-                                        month_num = '04'
-                                    # May
-                                    if month_str == 'May':
-                                        month_num = '05'
-                                    # June
-                                    if month_str == 'Jun':
-                                        month_num = '06'
-                                    # July
-                                    if month_str == 'Jul':
-                                        month_num = '07'
-                                    # August
-                                    if month_str == 'Aug':
-                                        month_num = '08'
-                                    # September
-                                    if month_str == 'Sep':
-                                        month_num = '09'
-                                    # October 
-                                    if month_str == 'Oct':
-                                        month_num = '10'
-                                    # November
-                                    if month_str == 'Nov':
-                                        month_num = '11'
-                                    # December
-                                    if month_str == 'Dec':
-                                        month_num = '12'
-
-                                    # Compute Datetime
-                                    date_str = '{0}-{1}-{2}'.format(gps_file[-18:-14], month_num, gps_file[-23:-21])
-                                    gps_date = datetime.date.fromisoformat(date_str)
-                                    gps_datetime = datetime.datetime.combine(gps_date, gpgga.timestamp)
-                                    gps_time.append(gps_datetime)
-                                    gps_time_linenum_val = linenum
-                                    gps_time_linenum.append(gps_time_linenum_val)
-                                    # Read in other attributes from the GPGGA sentence
-                                    z.append(gpgga.altitude)
-                                    lat.append(gpgga.latitude)
-                                    lon.append(gpgga.longitude)
-                            elif "GPVTG" in line:
-                                linenum += 1
-                                try:
-                                    gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
-                                    if type(gpvtg.spd_over_grnd_kmph) == float:
-                                        vel_linenum.append(linenum)
-                                        u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
-                                        v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
-                                except:
-                                    continue
-                                
-                            else: #if not GPGGA or GPVTG, continue to start of loop
-                                linenum += 1
+                            except:
                                 continue
+                            else:
+                            
+                                # Create datetime from timestamp and file name
+                                # Convert Month string to month num
+                                month_str = gps_file[-21:-18]
+                            
+                                # January
+                                if month_str == 'Jan':
+                                    month_num = '01'
+                                # February
+                                if month_str == 'Feb':
+                                    month_num = '02'
+                                # March
+                                if month_str == 'Mar':
+                                    month_num = '03'
+                                # April
+                                if month_str == 'Apr':
+                                    month_num = '04'
+                                # May
+                                if month_str == 'May':
+                                    month_num = '05'
+                                # June
+                                if month_str == 'Jun':
+                                    month_num = '06'
+                                # July
+                                if month_str == 'Jul':
+                                    month_num = '07'
+                                # August
+                                if month_str == 'Aug':
+                                    month_num = '08'
+                                # September
+                                if month_str == 'Sep':
+                                    month_num = '09'
+                                # October 
+                                if month_str == 'Oct':
+                                    month_num = '10'
+                                # November
+                                if month_str == 'Nov':
+                                    month_num = '11'
+                                # December
+                                if month_str == 'Dec':
+                                    month_num = '12'
+
+                                # Compute Datetime
+                                date_str = '{0}-{1}-{2}'.format(gps_file[-18:-14], month_num, gps_file[-23:-21])
+                                gps_date = datetime.date.fromisoformat(date_str)
+                                gps_datetime = datetime.datetime.combine(gps_date, gpgga.timestamp)
+                                gps_time.append(gps_datetime)
+                                gps_time_linenum_val = linenum
+                                gps_time_linenum.append(gps_time_linenum_val)
+                                # Read in other attributes from the GPGGA sentence
+                                z.append(gpgga.altitude)
+                                lat.append(gpgga.latitude)
+                                lon.append(gpgga.longitude)
+                        elif "GPVTG" in line:
+                            linenum += 1
+                            try:
+                                gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
+                                if type(gpvtg.spd_over_grnd_kmph) == float:
+                                    vel_linenum.append(linenum)
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
+                            except:
+                                continue
+                            
+                        else: #if not GPGGA or GPVTG, continue to start of loop
+                            linenum += 1
+                            continue
 
             # Sort each list based on time before saving so that each data point is in chronological order
             gps_time = np.array(gps_time)
