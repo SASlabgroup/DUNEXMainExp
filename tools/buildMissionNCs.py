@@ -40,16 +40,12 @@ def main():
 
     # Loop through each mission and build netCDF files
     for mission_num in np.arange(1, number_of_missions):
-        # Get start and end times
-        start_time = datetime.datetime.fromisoformat(dunex_xlsx['Start Time'].iloc[mission_num])
-        end_time = datetime.datetime.fromisoformat(dunex_xlsx['End Time'].iloc[mission_num])
-
         # Build a netCDF for the mission that has only raw time values read in 
         logging.info('building mission {}'.format(mission_num))
         tic = datetime.datetime.utcnow()
         mission_nc_path = buildBasicMissionNC.main(mission_num=mission_num)
         toc = datetime.datetime.utcnow()
-        logging.info('Time to build mission {0} was {1}}'.format(mission_num, toc-tic))
+        logging.info('Time to build mission {0} was {1}'.format(mission_num, toc-tic))
 
 if __name__=='__main__':
     main()
