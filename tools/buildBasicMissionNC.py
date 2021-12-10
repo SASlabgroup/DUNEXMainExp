@@ -98,8 +98,6 @@ def main(mission_num=0):
         imu_file_list = glob.glob(microSWIFT_dir + '/*IMU*.dat')
         gps_file_list = glob.glob(microSWIFT_dir + '/*GPS*.dat')
         if (len(imu_file_list) > 0) and (len(gps_file_list) > 0):
-            # Create netcdf group for microSWIFT
-            microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
             # ------ IMU Data Read-in ------
             # Define lists for each variable
@@ -221,40 +219,6 @@ def main(mission_num=0):
                 gyro_y_mission[mission_time_index_for_imu_value] = gyro_y_sorted_in_mission
                 gyro_z_mission = np.nan * np.ones(len(mission_time))
                 gyro_z_mission[mission_time_index_for_imu_value] = gyro_z_sorted_in_mission
-
-                # Save the data to the microSWIFT group in the netCDF
-                # Accelerations
-                accel_x_nc = microSWIFTgroup.createVariable('accel_x', 'f8', ('time',))
-                accel_x_nc.units = 'm/s^2'
-                accel_x_nc[:] = accel_x_mission
-                accel_y_nc = microSWIFTgroup.createVariable('accel_y', 'f8', ('time',))
-                accel_y_nc.units = 'm/s^2'
-                accel_y_nc[:] = accel_y_mission
-                accel_z_nc = microSWIFTgroup.createVariable('accel_z', 'f8', ('time',))
-                accel_z_nc.units = 'm/s^2'
-                accel_z_nc[:] = accel_z_mission
-
-                # Magnetometer
-                mag_x_nc = microSWIFTgroup.createVariable('mag_x', 'f8', ('time',))
-                mag_x_nc.units = 'uTeslas'
-                mag_x_nc[:] = mag_x_mission
-                mag_y_nc = microSWIFTgroup.createVariable('mag_y', 'f8', ('time',))
-                mag_y_nc.units = 'uTeslas'
-                mag_y_nc[:] = mag_y_mission
-                mag_z_nc = microSWIFTgroup.createVariable('mag_z', 'f8', ('time',))
-                mag_z_nc.units = 'uTeslas'
-                mag_z_nc[:] = mag_z_mission
-
-                # Gyroscope
-                gyro_x_nc = microSWIFTgroup.createVariable('gyro_x', 'f8', ('time',))
-                gyro_x_nc.units = 'degrees/sec'
-                gyro_x_nc[:] = gyro_x_mission
-                gyro_y_nc = microSWIFTgroup.createVariable('gyro_y', 'f8', ('time',))
-                gyro_y_nc.units = 'degrees/sec'
-                gyro_y_nc[:] = gyro_y_mission
-                gyro_z_nc = microSWIFTgroup.createVariable('gyro_z', 'f8', ('time',))
-                gyro_z_nc.units = 'degrees/sec'
-                gyro_z_nc[:] = gyro_z_mission
 
             # If there isn't any points within the mission - skip it
             else:
@@ -391,32 +355,17 @@ def main(mission_num=0):
                 # Latitude interpolation and saving to netCDF in the microSWIFT group
                 lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
                 lat_interpolated = lat_interp_func(mission_time_num)
-                lat_nc = microSWIFTgroup.createVariable('lat', 'f8', ('time',))
-                lat_nc.units = 'degrees_north'
-                lat_nc[:] = lat_interpolated
 
                 # Longitude interpolation and saving to netCDF in the microSWIFT group
                 lon_interp_func = interpolate.interp1d(gps_time_num, lon_sorted_in_mission, bounds_error=False, fill_value='NaN')
                 lon_interpolated = lon_interp_func(mission_time_num)
-                lon_nc = microSWIFTgroup.createVariable('lon', 'f8', ('time',))
-                lon_nc.units = 'degrees_east'
-                lon_nc[:] = lon_interpolated
 
                 # GPS Elevation interpolation and saving to netCDF in the microSWIFT group
                 z_interp_func = interpolate.interp1d(gps_time_num, z_sorted_in_mission, bounds_error=False, fill_value='NaN')
                 z_interpolated = z_interp_func(mission_time_num)
-                z_nc = microSWIFTgroup.createVariable('gpsElevation', 'f8', ('time',))
-                z_nc.units = 'degrees_east'
-                z_nc[:] = z_interpolated
 
                 # Compute FRF x and y locations 
                 x, y = microSWIFTTools.transform2FRF(lat=lat_interpolated, lon=lon_interpolated)
-                x_frf_nc = microSWIFTgroup.createVariable('xFRF', 'f8', ('time',))
-                x_frf_nc.units = 'meters'
-                x_frf_nc[:] = x
-                y_frf_nc = microSWIFTgroup.createVariable('yFRF', 'f8', ('time',))
-                y_frf_nc.units = 'meters'
-                y_frf_nc[:] = y
                 
                 # Interpolate times from GPGGA time to the GPVTG time
                 extrap_func = interpolate.interp1d(gps_time_linenum_in_mission, gps_time_num, fill_value='extrapolate')
@@ -434,18 +383,81 @@ def main(mission_num=0):
                 gps_u_mission = gps_u_interp_func(mission_time_num)
                 gps_v_interp_func = interpolate.interp1d(gps_vel_time_sorted, v_sorted, bounds_error=False, fill_value='NaN')
                 gps_v_mission = gps_v_interp_func(mission_time_num)
+            
+            # If there aren't any points in the mission time skip 
+            else:
+                continue
 
-                # Add all GPS Velocity values to the mission netcdf file
+            # Save all loaded in data to a microSWIFT subgroup 
+            # Check that this microSWIFT has all data before making a subgroup and saving
+            if np.all(np.isnan(lat))==False and np.all(np.isnan(accel_x_mission))==False:
+                # Create netcdf group for microSWIFT
+                microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
+
+                # Save IMU data to microSWIFT group
+                # Accelerations
+                accel_x_nc = microSWIFTgroup.createVariable('accel_x', 'f8', ('time',))
+                accel_x_nc.units = 'm/s^2'
+                accel_x_nc[:] = accel_x_mission
+                accel_y_nc = microSWIFTgroup.createVariable('accel_y', 'f8', ('time',))
+                accel_y_nc.units = 'm/s^2'
+                accel_y_nc[:] = accel_y_mission
+                accel_z_nc = microSWIFTgroup.createVariable('accel_z', 'f8', ('time',))
+                accel_z_nc.units = 'm/s^2'
+                accel_z_nc[:] = accel_z_mission
+
+                # Magnetometer
+                mag_x_nc = microSWIFTgroup.createVariable('mag_x', 'f8', ('time',))
+                mag_x_nc.units = 'uTeslas'
+                mag_x_nc[:] = mag_x_mission
+                mag_y_nc = microSWIFTgroup.createVariable('mag_y', 'f8', ('time',))
+                mag_y_nc.units = 'uTeslas'
+                mag_y_nc[:] = mag_y_mission
+                mag_z_nc = microSWIFTgroup.createVariable('mag_z', 'f8', ('time',))
+                mag_z_nc.units = 'uTeslas'
+                mag_z_nc[:] = mag_z_mission
+
+                # Gyroscope
+                gyro_x_nc = microSWIFTgroup.createVariable('gyro_x', 'f8', ('time',))
+                gyro_x_nc.units = 'degrees/sec'
+                gyro_x_nc[:] = gyro_x_mission
+                gyro_y_nc = microSWIFTgroup.createVariable('gyro_y', 'f8', ('time',))
+                gyro_y_nc.units = 'degrees/sec'
+                gyro_y_nc[:] = gyro_y_mission
+                gyro_z_nc = microSWIFTgroup.createVariable('gyro_z', 'f8', ('time',))
+                gyro_z_nc.units = 'degrees/sec'
+                gyro_z_nc[:] = gyro_z_mission
+
+                # Save GPS data to microSWIFT Group 
+
+                # Lat and Lon
+                lat_nc = microSWIFTgroup.createVariable('lat', 'f8', ('time',))
+                lat_nc.units = 'degrees_north'
+                lat_nc[:] = lat_interpolated
+                lon_nc = microSWIFTgroup.createVariable('lon', 'f8', ('time',))
+                lon_nc.units = 'degrees_east'
+                lon_nc[:] = lon_interpolated
+
+                # Altitude
+                z_nc = microSWIFTgroup.createVariable('gpsElevation', 'f8', ('time',))
+                z_nc.units = 'degrees_east'
+                z_nc[:] = z_interpolated
+
+                # FRF locations
+                x_frf_nc = microSWIFTgroup.createVariable('xFRF', 'f8', ('time',))
+                x_frf_nc.units = 'meters'
+                x_frf_nc[:] = x
+                y_frf_nc = microSWIFTgroup.createVariable('yFRF', 'f8', ('time',))
+                y_frf_nc.units = 'meters'
+                y_frf_nc[:] = y
+
+                # GPS velocity values
                 u_nc = microSWIFTgroup.createVariable('u', 'f8', ('time',))
                 u_nc.units = 'm/s'
                 u_nc[:] = gps_u_mission
                 v_nc = microSWIFTgroup.createVariable('v', 'f8', ('time',))
                 v_nc.units = 'm/s'
                 v_nc[:] = gps_v_mission
-            
-            # If there aren't any points in the mission time skip 
-            else:
-                continue
 
     # Close the dataset
     rootgrp.close()
