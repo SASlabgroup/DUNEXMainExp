@@ -2,6 +2,7 @@
 import numpy as np
 import logging
 import netCDF4 as nc
+import matplotlib.pyplot as plt
 
 def computeBeachLocation():
     '''
@@ -12,34 +13,58 @@ def computeBeachLocation():
 
     '''
     # load in bathymetry 
-    url = ''
+    url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20211021.nc'
     bathy = nc.Dataset(url)
+    xFRF = bathy['xFRF'][:]
+    yFRF = bathy['yFRF'][:]
+    xFRF_grid, yFRF_grid = np.meshgrid(xFRF, yFRF)
+    elevation = bathy['elevation'][0,:,:]
 
     # Load in water level data
-    waterLevel = 0  # units are meters
+    # TODO: replace these values with true waterLavel Data
+    time = np.arange(100)
+    waterLevel_series = 5 * np.sin(((2*np.pi)/10) * time)  # units are meters
 
-    # define empty list to fill with values for beach x location
+    # Define empty list for max x values
     beach_x_series = []
-
-    # Compute depth 
-    depth = bathy + waterLevel
-    depth[depth < 0] = 0
-    depth[depth > 0 ] = 1
-    # find last index that is one for each row
-
-    # Find max last index and then the beach xFRF location
-    beach_x = 20
-
+    
     # define cross shore buffer
-    buffer = 20 # units are meters
+    buffer = 5 # units are meters
 
-    # Append to time series
-    beach_x_series.append(beach_x + buffer)
+    for waterLevel in waterLevel_series:
+
+        # Compute depth 
+        depth = elevation + waterLevel
+        depth[depth < 0] = 0
+        depth[depth > 0 ] = 1
+
+        # define empty list to fill with values for beach x location
+        max_x_row = []
+        for n in np.arange(len(yFRF)):
+            max_x_row.append(xFRF[np.where(depth[n,:] == 0)[0][0]])
+        max_x = np.max(max_x_row)
+        max_x += buffer
+
+        # Append to time series
+        beach_x_series.append(max_x)
+
+    # fig, ax = plt.subplots()
+    # ax.plot(beach_x_series)
+    # plt.savefig('max_x.png')
 
     # return the time series
-    return beach_x_series
+    return beach_x_series, time
 
-def main():
+def individualMissionMicroSWIFTMask(mission_num = None):
+    '''
+    Returns the indivudal mask for each microSWIFT in each mission which are developed from visual inspection - each mask has notes as to how it was developed
+    
+    '''
+
+
+
+
+def main(mission_num = None):
     '''
     @edwinrainville
 
@@ -50,31 +75,42 @@ def main():
     logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', encoding='utf-8', level=logging.DEBUG)
 
      # Compute beach 
-    beach_x_series = computeBeachLocation()
-
-    # Define number of missions
-    number_of_missions = 81
+    beach_x_series, time = computeBeachLocation()
 
     # Load in each mission netCDF and apply masks 
     data_dir = '../microSWIFT_data/cleanedDataset/'
 
     # Define mission Number
-    mission_num = 20
+    if mission_num == None:
+        mission_num = 20
+        # mission_num = int(input('Enter Mission Number: '))
+
+    # Convert mission number to a path to the file
     mission_nc = 'mission_{}.nc'.format(mission_num)
+    mission_nc_path = data_dir + mission_nc
 
     # Load in mission datset as a netCDF object
-    mission_dataset = nc.Dataset(mission_nc, mode='a')
+    mission_dataset = nc.Dataset(mission_nc_path, mode='a')
+
+    # From start time find the correct beach_x value 
+    beach_x_during_mission = beach_x_series[0]
 
     # For each microSWIFT on mission
     microSWIFTs_on_mission = list(mission_dataset.groups.keys())
-    # for microSWIFT in microSWIFTs_on_mission:
-    microSWIFT = microSWIFTs_on_mission[0]
+    for microSWIFT in microSWIFTs_on_mission:
+        # Get values for cross shore location of microSWIFT
+        xFRF = mission_dataset[microSWIFT]['xFRF'][:]
+
+        # Find first index in the xFRF data that is less than the beach location
+        beach_mask_ind = np.where(xFRF <= beach_x_during_mission)
+
+        # Mask all indices where the microSWIFT is on the beach
+        microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
+        for variable in microSWIFT_variables:
+            mission_dataset[microSWIFT][variable][beach_mask_ind] = np.ma.masked
 
     # Close the dataset
     mission_dataset.close()
-
-
-
 
 
 if __name__ == '__main__':
