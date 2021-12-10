@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import cftime
 import matplotlib.backends.backend_pdf
 
-def main(mission_nc_path=None, mission_num=None):
+def main(mission_num=None):
     '''
     @edwinrainville
 
@@ -27,12 +27,12 @@ def main(mission_nc_path=None, mission_num=None):
         Click Through each microSWIFT in a mission 
     
     '''
-    # User Inputs
-    if mission_nc_path == None:
-        mission_nc_path = input('Enter path to mission netCDF:')
-    
+    # User Inputs    
     if mission_num == None:
-        mission_num = int(input('Enter mission number:'))
+        mission_num = int(input('Enter mission number: '))
+
+    # define the mission file name
+    mission_nc_path = '../microSWIFT_Data/cleanedDataset/mission_{}.nc'.format(mission_num)
 
     # Create dataset object from the netCDF path
     mission_dataset = nc.Dataset(mission_nc_path, mode='r')
@@ -41,14 +41,14 @@ def main(mission_nc_path=None, mission_num=None):
     time = cftime.num2pydate(mission_dataset['time'][:], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
 
     # Set up pdf to save figures to for each microSWIFT
-    pdf_name = '../buildDataset/missionViews/mission_{}.pdf'.format(mission_num)
+    pdf_name = '../microSWIFT_data/cleanedDataset/Figures/mission_{}.pdf'.format(mission_num)
     pdf = matplotlib.backends.backend_pdf.PdfPages(pdf_name)
 
     # Get list of all microSWIFTs on the mission
     microSWIFTs_on_mission = list(mission_dataset.groups.keys())
 
     # Loop through all microSWIFTs on mission to build the mission View
-    for microSWIFT_num in np.arange(len(microSWIFTs_on_mission)):
+    for microSWIFT in microSWIFTs_on_mission:
 
         # Create map of drift tracks for the microSWIFT
         fig = plt.figure()
@@ -67,44 +67,48 @@ def main(mission_nc_path=None, mission_num=None):
         ax1.contourf(xFRF_grid, yFRF_grid, bathy, cmap='gray')
 
         # Plot the microSWIFT drift track on bathymetry
-        x = mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['xFRF'][:]
-        y = mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['yFRF'][:]
+        x = mission_dataset[microSWIFT]['xFRF'][:]
+        y = mission_dataset[microSWIFT]['yFRF'][:]
         ax1.scatter(x, y, color='g')
-        ax1.set_xlim([np.min(x)-100, np.max(x)+100])
-        ax1.set_ylim([np.min(y)-100, np.max(y)+100])
-        ax1.set_title('Drift Track')
+        ax1.set_xlim([np.nanmin(x)-100, np.nanmax(x)+100])
+        ax1.set_ylim([np.nanmin(y)-100, np.nanmax(y)+100])
+        ax1.set_title('Drift Track for {}'.format(microSWIFT))
 
         # Plot the accelerations
         ax2 = fig.add_subplot(3,2,2)
-        ax2.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['accel_x'][:], color='g', label='X')
-        ax2.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['accel_y'][:], color='b', label='Y')
-        ax2.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['accel_z'][:], color='k', label='Z')
+        ax2.plot(time, mission_dataset[microSWIFT]['accel_x'][:], color='g', label='X')
+        ax2.plot(time, mission_dataset[microSWIFT]['accel_y'][:], color='b', label='Y')
+        ax2.plot(time, mission_dataset[microSWIFT]['accel_z'][:], color='k', label='Z')
         ax2.set_xlabel('Time')
         ax2.set_ylabel('Acceleration [m/s^2]')
         ax2.legend(bbox_to_anchor=(0,1.04,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
+        ax2.set_xticks([time[0], time[-1]])
 
         # Plot the Gyroscope
         ax3 = fig.add_subplot(3,2,4)
-        ax3.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['gyro_x'][:], color='g', label='X')
-        ax3.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['gyro_y'][:], color='b', label='Y')
-        ax3.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['gyro_z'][:], color='k', label='Z')
+        ax3.plot(time, mission_dataset[microSWIFT]['gyro_x'][:], color='g', label='X')
+        ax3.plot(time, mission_dataset[microSWIFT]['gyro_y'][:], color='b', label='Y')
+        ax3.plot(time, mission_dataset[microSWIFT]['gyro_z'][:], color='k', label='Z')
         ax3.set_xlabel('Time')
         ax3.set_ylabel('Rotations [degrees/sec]')
         ax3.set_title('Gyroscope')
+        ax3.set_xticks([time[0], time[-1]])
 
         # Plot the Magnetometer
         ax4 = fig.add_subplot(3,2,6)
-        ax4.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['mag_x'][:], color='g', label='X')
-        ax4.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['mag_y'][:], color='b', label='Y')
-        ax4.plot(time, mission_dataset[microSWIFTs_on_mission[microSWIFT_num]]['mag_z'][:], color='k', label='Z')
+        ax4.plot(time, mission_dataset[microSWIFT]['mag_x'][:], color='g', label='X')
+        ax4.plot(time, mission_dataset[microSWIFT]['mag_y'][:], color='b', label='Y')
+        ax4.plot(time, mission_dataset[microSWIFT]['mag_z'][:], color='k', label='Z')
         ax4.set_xlabel('Time')
         ax4.set_ylabel('Magnetometer [uTeslas]')
         ax4.set_title('Magnetometer')
+        ax4.set_xticks([time[0], time[-1]])
 
         # Figure Properties 
         plt.tight_layout()
         ax1.set_aspect('equal')
         pdf.savefig(fig)
+        plt.close()
 
     # Close the dataset
     mission_dataset.close()
