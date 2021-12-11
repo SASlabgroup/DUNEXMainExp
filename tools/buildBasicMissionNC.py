@@ -188,7 +188,6 @@ def main(mission_num=0):
                 gyro_y_sorted_in_mission = gyro_y_sorted[inds_in_mission]    
                 gyro_z_sorted_in_mission = gyro_z_sorted[inds_in_mission]    
 
-                
                 # Map each index in the imu time series to an index in the overall time series
                 mission_time_index_for_imu_value = np.searchsorted(mission_time, imu_time_sorted_in_mission, side='right')
 
