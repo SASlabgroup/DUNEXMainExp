@@ -76,33 +76,33 @@ def main(mission_num=None):
 
         # Plot the accelerations
         ax2 = fig.add_subplot(3,2,2)
-        ax2.plot(time, mission_dataset[microSWIFT]['accel_x'][:], color='g', label='X')
-        ax2.plot(time, mission_dataset[microSWIFT]['accel_y'][:], color='b', label='Y')
-        ax2.plot(time, mission_dataset[microSWIFT]['accel_z'][:], color='k', label='Z')
-        ax2.set_xlabel('Time')
+        ax2.plot(mission_dataset[microSWIFT]['accel_x'][:], color='g', label='X')
+        ax2.plot(mission_dataset[microSWIFT]['accel_y'][:], color='b', label='Y')
+        ax2.plot(mission_dataset[microSWIFT]['accel_z'][:], color='k', label='Z')
+        ax2.set_xlabel('Index')
         ax2.set_ylabel('Acceleration [m/s^2]')
         ax2.legend(bbox_to_anchor=(0,1.04,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
-        ax2.set_xticks([time[0], time[-1]])
+        ax2.set_xlim(0, len(time))
 
         # Plot the Gyroscope
         ax3 = fig.add_subplot(3,2,4)
-        ax3.plot(time, mission_dataset[microSWIFT]['gyro_x'][:], color='g', label='X')
-        ax3.plot(time, mission_dataset[microSWIFT]['gyro_y'][:], color='b', label='Y')
-        ax3.plot(time, mission_dataset[microSWIFT]['gyro_z'][:], color='k', label='Z')
-        ax3.set_xlabel('Time')
+        ax3.plot(mission_dataset[microSWIFT]['gyro_x'][:], color='g', label='X')
+        ax3.plot(mission_dataset[microSWIFT]['gyro_y'][:], color='b', label='Y')
+        ax3.plot(mission_dataset[microSWIFT]['gyro_z'][:], color='k', label='Z')
+        ax3.set_xlabel('Index')
         ax3.set_ylabel('Rotations [degrees/sec]')
         ax3.set_title('Gyroscope')
-        ax3.set_xticks([time[0], time[-1]])
+        ax3.set_xlim(0, len(time))
 
         # Plot the Magnetometer
         ax4 = fig.add_subplot(3,2,6)
-        ax4.plot(time, mission_dataset[microSWIFT]['mag_x'][:], color='g', label='X')
-        ax4.plot(time, mission_dataset[microSWIFT]['mag_y'][:], color='b', label='Y')
-        ax4.plot(time, mission_dataset[microSWIFT]['mag_z'][:], color='k', label='Z')
-        ax4.set_xlabel('Time')
+        ax4.plot(mission_dataset[microSWIFT]['mag_x'][:], color='g', label='X')
+        ax4.plot(mission_dataset[microSWIFT]['mag_y'][:], color='b', label='Y')
+        ax4.plot(mission_dataset[microSWIFT]['mag_z'][:], color='k', label='Z')
+        ax4.set_xlabel('Index')
         ax4.set_ylabel('Magnetometer [uTeslas]')
         ax4.set_title('Magnetometer')
-        ax4.set_xticks([time[0], time[-1]])
+        ax4.set_xlim(0, len(time))
 
         # Figure Properties 
         plt.tight_layout()
