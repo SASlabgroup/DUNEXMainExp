@@ -20,13 +20,11 @@ def main():
     TODO: Finish writing description
     '''
     # Set up logger
-    logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', filemode='w', encoding='utf-8')
+    logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', filemode='w', encoding='utf-8', level='INFO')
 
     # Define number of missions
-    mission_start = 7
-    mission_end = 81
-    # number_of_missions = 81
-    # number_of_missions = 5
+    mission_start = 2
+    mission_end = 10
 
     # start timer for entire dataset build
     start_build = datetime.datetime.utcnow()
@@ -54,12 +52,12 @@ def main():
         toc = datetime.datetime.utcnow()
         logging.info('Time to plot mission {0} was {1}'.format(mission_num, toc-tic))
 
-        # # Make Drift movie
-        # logging.info('making drfit movie for mission {} dataset'.format(mission_num))
-        # tic = datetime.datetime.utcnow()
-        # makeDriftMovie.main(mission_num=mission_num)
-        # toc = datetime.datetime.utcnow()
-        # logging.info('Time to make drift movie for mission {0} was {1}'.format(mission_num, toc-tic))
+        # Make Drift movie
+        logging.info('making drfit movie for mission {} dataset'.format(mission_num))
+        tic = datetime.datetime.utcnow()
+        makeDriftMovie.main(mission_num=mission_num)
+        toc = datetime.datetime.utcnow()
+        logging.info('Time to make drift movie for mission {0} was {1}'.format(mission_num, toc-tic))
 
     # Finish timing the build
     end_build = datetime.datetime.utcnow()
