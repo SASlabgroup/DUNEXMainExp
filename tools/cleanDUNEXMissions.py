@@ -4,6 +4,7 @@ import logging
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 import cftime
+import pandas as pd
 
 def computeBeachLocation():
     '''
@@ -59,116 +60,6 @@ def computeBeachLocation():
     # return the time series
     return beach_x_series, time
 
-def individualMissionMicroSWIFTMask(mission_num = None):
-    '''
-    Returns the indivudal mask for each microSWIFT in each mission which are developed from visual inspection - each mask has notes as to how it was developed
-    TODO: Make spreadsheet of all individual mask slices
-    '''
-    # Define mission Number
-    if mission_num == None:
-        mission_num = int(input('Enter Mission Number: '))
-
-    # Function to initialize mask dictionary
-    def init_mask_dict(mission_num=mission_num):
-        # define mission netCF
-        mission_dataset = nc.Dataset('../microSWIFT_data/cleanedDataset/mission_{}.nc'.format(mission_num))
-
-        # define list of microSWIFTs on mission 
-        microSWIFTs_on_mission = list(mission_dataset.groups.keys())
-
-        # Initialize mask 
-        mission_masks = {microSWIFT: None for microSWIFT in microSWIFTs_on_mission}
-
-        # Return the initialized mask
-        return mission_masks
-    
-    # Mission 1 Individual mask 
-    if mission_num == 1:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 2 Individual mask 
-    if mission_num == 2:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 3 Individual mask 
-    if mission_num == 3:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 4 Individual mask 
-    if mission_num == 4:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 5 Individual mask 
-    if mission_num == 5:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 6 Individual mask 
-    if mission_num == 6:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 7 Individual mask 
-    if mission_num == 7:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 8 Individual mask 
-    if mission_num == 8:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-
-    # Mission 9 Individual mask 
-    if mission_num == 9:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-    # Mission 10 Individual mask 
-    if mission_num == 10:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # Append Mask with indices to mask
-
-     # Mission 20 Individual mask 
-    if mission_num == 20:
-        # Intialize mask 
-        mission_masks = init_mask_dict(mission_num=mission_num)
-
-        # microSWIFT_31
-        # description: There is a section of all imu data at the end of the time series that values are not fluctuating signifying that it is on the beach but not masked by the 
-        mission_masks['microSWIFT_31'] = slice(9000, -1)
-
-        # microSWIFT_21
-        # description: There is a very small section of data at the very end of the time series that it most likely is being masked from the beach but maybe moved back across the beach mask briefly 
-        mission_masks['microSWIFT_21'] = slice(10000, -1)
-        
-    # Return the mission mask dictionary
-    return mission_masks
-
 def main(mission_num=None):
     '''
     @edwinrainville
@@ -215,19 +106,37 @@ def main(mission_num=None):
         for variable in microSWIFT_variables:
             mission_dataset[microSWIFT][variable][beach_mask_ind] = np.ma.masked
 
-    # Mask each individual microSWIFT on each mission
-    mission_mask_dict = individualMissionMicroSWIFTMask(mission_num=mission_num)
-    for microSWIFT in list(mission_mask_dict.keys()):
-        microSWIFT_mask = mission_mask_dict[microSWIFT]
-        if microSWIFT_mask != None:
-            # Mask all indices where the microSWIFT is on the beach
-            microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
-            for variable in microSWIFT_variables:
-                mission_dataset[microSWIFT][variable][microSWIFT_mask] = np.ma.masked
+    # Read in mask values from spreadsheet and mask all those values
+    dunex_notes_filename = '../DUNEXMainExp_notes.xlsx'
+    dunex_df = pd.read_excel(dunex_notes_filename, 'Masks')
+    dunex_df['Mission Number'] = pd.Series(dunex_df['Mission Number']).fillna(method='ffill')
+
+    # Find all rows in mission 
+    mission_masks = dunex_df[dunex_df['Mission Number'] == mission_num]
+
+    # microSWIFT Masks
+    microSWIFTs_masked_on_mission = list(dunex_df[dunex_df['Mission Number'] == mission_num]['microSWIFT ID'])
+
+    for microSWIFT in microSWIFTs_masked_on_mission:
+        # Get list of microSWIFT Varaibles
+        microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
+
+        # Get the mask values from spreadsheet 
+        individual_microSWIFT_mask = mission_masks[mission_masks['microSWIFT ID'] == microSWIFT]
+
+        # Mask from Begininng to start mask end index 
+        start_mask_end_index = int(individual_microSWIFT_mask['Start Mask Index'].item())
+        end_mask_start_index = int(individual_microSWIFT_mask['End Mask Index'].item())
+        additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
+
+        # Mask all indices in the mask list
+        for variable in microSWIFT_variables:
+            mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
+            mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
+            mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
     
     # Close the dataset
     mission_dataset.close()
-
 
 if __name__ == '__main__':
     main()
