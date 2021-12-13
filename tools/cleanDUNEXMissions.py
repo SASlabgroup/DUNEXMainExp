@@ -62,7 +62,7 @@ def computeBeachLocation():
 def individualMissionMicroSWIFTMask(mission_num = None):
     '''
     Returns the indivudal mask for each microSWIFT in each mission which are developed from visual inspection - each mask has notes as to how it was developed
-    
+    TODO: Make spreadsheet of all individual mask slices
     '''
     # Define mission Number
     if mission_num == None:
@@ -89,6 +89,69 @@ def individualMissionMicroSWIFTMask(mission_num = None):
 
         # Append Mask with indices to mask
 
+    # Mission 2 Individual mask 
+    if mission_num == 2:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 3 Individual mask 
+    if mission_num == 3:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 4 Individual mask 
+    if mission_num == 4:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 5 Individual mask 
+    if mission_num == 5:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 6 Individual mask 
+    if mission_num == 6:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 7 Individual mask 
+    if mission_num == 7:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 8 Individual mask 
+    if mission_num == 8:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+
+    # Mission 9 Individual mask 
+    if mission_num == 9:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
+
+    # Mission 10 Individual mask 
+    if mission_num == 10:
+        # Intialize mask 
+        mission_masks = init_mask_dict(mission_num=mission_num)
+
+        # Append Mask with indices to mask
 
      # Mission 20 Individual mask 
     if mission_num == 20:
