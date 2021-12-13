@@ -39,7 +39,7 @@ def main(mission_num=0):
     metadata_filename = project_dir + metadata_name
 
     # Create dataframe object from DUNEX MetaData SpreadSheet
-    dunex_xlsx = pd.read_excel(metadata_filename)
+    dunex_xlsx = pd.read_excel(metadata_filename, 'Main Experiment')
 
     # Define Mission Number
     # User input for mission number if not provided intially 
