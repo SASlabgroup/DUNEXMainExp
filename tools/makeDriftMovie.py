@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import cftime
 import matplotlib.animation as animation
 
-def main(mission_num=None):
+def main(mission_num=None, filename=None):
     '''
     @edwinrainville
 
@@ -57,12 +57,14 @@ def main(mission_num=None):
             ax.plot(mission_dataset[microSWIFT]['xFRF'][index], mission_dataset[microSWIFT]['yFRF'][index], color='g', marker='o')
         
         # Add title with time
-        ax.set_title('Mission {0} - {1}'.format(mission_num, time[index]))
+        ax.set_title('Mission {0} - {1}'.format(mission_num, index))
 
     # Creating the Animation object
     data_skip = 200
     anim = animation.FuncAnimation(fig, update_tracks, frames=np.arange(0, len(time), data_skip), init_func=init_tracks)
-    anim.save('../microSWIFT_data/cleanedDataset/Figures/mission_{}_drift.gif'.format(mission_num), dpi=150, fps=10, writer='pillow')
+    if filename == None:
+        filename = 'mission_{}_drift.gif'.format(mission_num)
+    anim.save('../microSWIFT_data/cleanedDataset/Figures/{}'.format(filename), dpi=150, fps=10, writer='pillow')
 
     # Close dataset and figures
     mission_dataset.close()
