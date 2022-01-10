@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import cftime
 import matplotlib.backends.backend_pdf
 
-def main(mission_num=None):
+def main(mission_num=None, filename=None):
     '''
     @edwinrainville
 
@@ -41,7 +41,9 @@ def main(mission_num=None):
     time = cftime.num2pydate(mission_dataset['time'][:], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
 
     # Set up pdf to save figures to for each microSWIFT
-    pdf_name = '../microSWIFT_data/cleanedDataset/Figures/mission_{}.pdf'.format(mission_num)
+    if filename == None:
+        filename = 'mission_{}.pdf'.format(mission_num)
+    pdf_name = '../microSWIFT_data/cleanedDataset/Figures/{}'.format(filename)
     pdf = matplotlib.backends.backend_pdf.PdfPages(pdf_name)
 
     # Get list of all microSWIFTs on the mission

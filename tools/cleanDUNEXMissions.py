@@ -108,7 +108,7 @@ def main(mission_num=None):
 
     # Read in mask values from spreadsheet and mask all those values
     dunex_notes_filename = '../DUNEXMainExp_notes.xlsx'
-    dunex_df = pd.read_excel(dunex_notes_filename, 'Masks')
+    dunex_df = pd.read_excel(dunex_notes_filename, 'microSWIFT Masks')
     dunex_df['Mission Number'] = pd.Series(dunex_df['Mission Number']).fillna(method='ffill')
 
     # Find all rows in mission 
@@ -116,24 +116,24 @@ def main(mission_num=None):
 
     # microSWIFT Masks
     microSWIFTs_masked_on_mission = list(dunex_df[dunex_df['Mission Number'] == mission_num]['microSWIFT ID'])
+    if type(microSWIFTs_masked_on_mission[0]) == str:
+        for microSWIFT in microSWIFTs_masked_on_mission:
+            # Get list of microSWIFT Varaibles
+            microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
 
-    for microSWIFT in microSWIFTs_masked_on_mission:
-        # Get list of microSWIFT Varaibles
-        microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
+            # Get the mask values from spreadsheet 
+            individual_microSWIFT_mask = mission_masks[mission_masks['microSWIFT ID'] == microSWIFT]
 
-        # Get the mask values from spreadsheet 
-        individual_microSWIFT_mask = mission_masks[mission_masks['microSWIFT ID'] == microSWIFT]
+            # Mask from Begininng to start mask end index 
+            start_mask_end_index = int(individual_microSWIFT_mask['Start Mask End Index'].item())
+            end_mask_start_index = int(individual_microSWIFT_mask['End Mask Start Index'].item())
+            additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
 
-        # Mask from Begininng to start mask end index 
-        start_mask_end_index = int(individual_microSWIFT_mask['Start Mask Index'].item())
-        end_mask_start_index = int(individual_microSWIFT_mask['End Mask Index'].item())
-        additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
-
-        # Mask all indices in the mask list
-        for variable in microSWIFT_variables:
-            mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
-            mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
-            mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
+            # Mask all indices in the mask list
+            for variable in microSWIFT_variables:
+                mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
+                mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
+                mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
     
     # Close the dataset
     mission_dataset.close()
