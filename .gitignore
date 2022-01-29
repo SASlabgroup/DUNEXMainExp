@@ -206,3 +206,4 @@ writing/._abstract.tex
 # Ignore all pdfs
 *.pdf
 tools/profilingStatsAsText.txt
+writing/Figures/CompositeTrackMap.png

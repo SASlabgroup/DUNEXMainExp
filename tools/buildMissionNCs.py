@@ -23,8 +23,8 @@ def main():
     logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', filemode='w', encoding='utf-8', level='INFO')
 
     # Define number of missions
-    mission_start = 43
-    mission_end = 81
+    mission_start = 70
+    mission_end = 70
 
     # start timer for entire dataset build
     start_build = datetime.datetime.utcnow()
@@ -37,22 +37,6 @@ def main():
         mission_nc_path = buildBasicMissionNC.main(mission_num=mission_num)
         toc = datetime.datetime.utcnow()
         logging.info('Time to build mission {0} was {1}'.format(mission_num, toc-tic))
-
-         # Plot the mission dataset to view before cleaning
-        logging.info('plotting mission {} dataset'.format(mission_num))
-        tic = datetime.datetime.utcnow()
-        filename = 'mission_{}_uncleaned.pdf'.format(mission_num)
-        missionView.main(mission_num=mission_num, filename=filename)
-        toc = datetime.datetime.utcnow()
-        logging.info('Time to plot mission {0} was {1}'.format(mission_num, toc-tic))
-
-        # Make Drift movie after cleaning
-        logging.info('making drfit movie for mission {} dataset'.format(mission_num))
-        tic = datetime.datetime.utcnow()
-        filename = 'mission_{}_drift_uncleaned.gif'.format(mission_num)
-        makeDriftMovie.main(mission_num=mission_num, filename=filename)
-        toc = datetime.datetime.utcnow()
-        logging.info('Time to make drift movie for mission {0} was {1}'.format(mission_num, toc-tic))
 
         # Clean the dataset
         logging.info('cleaning mission {}'.format(mission_num))
@@ -69,13 +53,13 @@ def main():
         toc = datetime.datetime.utcnow()
         logging.info('Time to plot mission {0} was {1}'.format(mission_num, toc-tic)) 
         
-       # Make Drift movie after cleaning
-        logging.info('making drfit movie for mission {} dataset'.format(mission_num))
-        tic = datetime.datetime.utcnow()
-        filename = 'mission_{}_drift_cleaned.gif'.format(mission_num)
-        makeDriftMovie.main(mission_num=mission_num, filename=filename)
-        toc = datetime.datetime.utcnow()
-        logging.info('Time to make drift movie for mission {0} was {1}'.format(mission_num, toc-tic))
+    #    # Make Drift movie after cleaning
+    #     logging.info('making drfit movie for mission {} dataset'.format(mission_num))
+    #     tic = datetime.datetime.utcnow()
+    #     filename = 'mission_{}_drift_cleaned.gif'.format(mission_num)
+    #     makeDriftMovie.main(mission_num=mission_num, filename=filename)
+    #     toc = datetime.datetime.utcnow()
+    #     logging.info('Time to make drift movie for mission {0} was {1}'.format(mission_num, toc-tic))
 
     # Finish timing the build
     end_build = datetime.datetime.utcnow()

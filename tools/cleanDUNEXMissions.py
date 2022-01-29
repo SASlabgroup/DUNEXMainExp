@@ -53,10 +53,6 @@ def computeBeachLocation():
         # Append to time series
         beach_x_series.append(max_x)
 
-    # fig, ax = plt.subplots()
-    # ax.plot(beach_x_series)
-    # plt.savefig('max_x.png')
-
     # return the time series
     return beach_x_series, time
 
@@ -71,7 +67,7 @@ def main(mission_num=None):
     logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', encoding='utf-8', level=logging.DEBUG)
 
      # Compute beach 
-    beach_x_series, beach_x_time = computeBeachLocation()
+    # beach_x_series, beach_x_time = computeBeachLocation()
 
     # Load in each mission netCDF and apply masks 
     data_dir = '../microSWIFT_data/cleanedDataset/'
@@ -87,16 +83,20 @@ def main(mission_num=None):
     # Load in mission datset as a netCDF object
     mission_dataset = nc.Dataset(mission_nc_path, mode='a')
 
-    # From start time find the correct beach_x value 
-    mission_start = cftime.num2pydate(mission_dataset['time'][0], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
-    start_time_closest_index = int(np.argmin(np.abs(beach_x_time - mission_start)))
-    beach_x_during_mission = beach_x_series[start_time_closest_index]
+    ## From start time find the correct beach_x value 
+    # mission_start = cftime.num2pydate(mission_dataset['time'][0], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
+    # start_time_closest_index = int(np.argmin(np.abs(beach_x_time - mission_start)))
+    # beach_x_during_mission = beach_x_series[start_time_closest_index]
+
+    # For now just set all beach locations at 175 m xFRF
+    beach_x_during_mission = 140
 
     # For each microSWIFT on mission
     microSWIFTs_on_mission = list(mission_dataset.groups.keys())
     for microSWIFT in microSWIFTs_on_mission:
         # Get values for cross shore location of microSWIFT
         xFRF = mission_dataset[microSWIFT]['xFRF'][:]
+
 
         # Find first index in the xFRF data that is less than the beach location
         beach_mask_ind = np.where(xFRF <= beach_x_during_mission)
@@ -127,13 +127,15 @@ def main(mission_num=None):
             # Mask from Begininng to start mask end index 
             start_mask_end_index = int(individual_microSWIFT_mask['Start Mask End Index'].item())
             end_mask_start_index = int(individual_microSWIFT_mask['End Mask Start Index'].item())
-            additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
+            if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
+                additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
 
             # Mask all indices in the mask list
             for variable in microSWIFT_variables:
                 mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
                 mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
-                mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
+                if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
+                    mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
     
     # Close the dataset
     mission_dataset.close()

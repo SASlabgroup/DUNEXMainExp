@@ -138,7 +138,7 @@ def main():
 
     # Set Figure Properties
     plt.tight_layout
-    plt.savefig('./Figures/wave-parameter-time-series.png')
+    plt.savefig('../writing/Figures/wave-parameter-time-series.png')
 
     # Sort all parameters during microSWIFT deployments
     # Sort Indices within experiment
@@ -201,7 +201,7 @@ def main():
 
     # Figure Properties
     plt.tight_layout()
-    plt.savefig('./Figures/parameter-space-sampled.png')
+    plt.savefig('../writing/Figures/parameter-space-sampled.png')
 
     # Color Coded by peak direction scatter plot
     fig_HsTpDp, ax = plt.subplots()
@@ -216,7 +216,7 @@ def main():
     cbar.ax.set_ylabel('Peak Direction, Dp [degrees]')
 
     # Save figure
-    plt.savefig('./Figures/wave-parameter-scatter-color.png')
+    plt.savefig('../writing/Figures/wave-parameter-scatter-color.png')
 
     # Compute Iribarren Number from sampled parameters
     

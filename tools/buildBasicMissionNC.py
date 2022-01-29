@@ -389,7 +389,7 @@ def main(mission_num=0):
 
             # Save all loaded in data to a microSWIFT subgroup 
             # Check that this microSWIFT has all data before making a subgroup and saving
-            if np.all(np.isnan(lat))==False and np.all(np.isnan(accel_x_mission))==False:
+            if np.all(np.isnan(lat))==False and np.all(np.isnan(lon))==False and np.all(np.isnan(accel_x_mission))==False:
                 # Create netcdf group for microSWIFT
                 microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 

@@ -51,7 +51,8 @@ def main(mission_num=None, filename=None):
 
     # Loop through all microSWIFTs on mission to build the mission View
     for microSWIFT in microSWIFTs_on_mission:
-
+        print(microSWIFT)
+        
         # Create map of drift tracks for the microSWIFT
         fig = plt.figure()
         fig.set_size_inches(8.5, 11)
@@ -61,12 +62,12 @@ def main(mission_num=None, filename=None):
 
         # Add the FRF Bathymetry to the map 
         # Data from September 28th, 2021
-        bathy_url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20210928.nc'
-        bathy_dataset = nc.Dataset(bathy_url)
-        # Create grid from coordinates
-        xFRF_grid, yFRF_grid = np.meshgrid(bathy_dataset['xFRF'][:],bathy_dataset['yFRF'][:])
-        bathy = bathy_dataset['elevation'][0,:,:]
-        ax1.contourf(xFRF_grid, yFRF_grid, bathy, cmap='gray')
+        # bathy_url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20210928.nc'
+        # bathy_dataset = nc.Dataset(bathy_url)
+        # # Create grid from coordinates
+        # xFRF_grid, yFRF_grid = np.meshgrid(bathy_dataset['xFRF'][:],bathy_dataset['yFRF'][:])
+        # bathy = bathy_dataset['elevation'][0,:,:]
+        # ax1.contourf(xFRF_grid, yFRF_grid, bathy, cmap='gray')
 
         # Plot the microSWIFT drift track on bathymetry
         x = mission_dataset[microSWIFT]['xFRF'][:]
@@ -114,7 +115,7 @@ def main(mission_num=None, filename=None):
 
     # Close the dataset
     mission_dataset.close()
-    bathy_dataset.close()
+    # bathy_dataset.close()
     pdf.close()
 
 if __name__=='__main__':
