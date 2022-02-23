@@ -13,7 +13,7 @@ import sys
 sys.path.append('..')
 from tools import microSWIFTTools
 
-def main(mission_num=0):
+def main(mission_num=None):
     '''
     @edwinrainville
 
@@ -218,6 +218,21 @@ def main(mission_num=0):
                 gyro_y_mission[mission_time_index_for_imu_value] = gyro_y_sorted_in_mission
                 gyro_z_mission = np.nan * np.ones(len(mission_time))
                 gyro_z_mission[mission_time_index_for_imu_value] = gyro_z_sorted_in_mission
+
+                # Fill all gaps with linear interpolation 
+                imu_nans = np.isnan(accel_x_mission)
+                # accelerations
+                accel_x_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], accel_x_mission[~imu_nans])
+                accel_y_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], accel_y_mission[~imu_nans])
+                accel_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], accel_z_mission[~imu_nans])
+                # Gyroscope 
+                gyro_x_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], gyro_x_mission[~imu_nans])
+                gyro_y_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], gyro_y_mission[~imu_nans])
+                gyro_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], gyro_z_mission[~imu_nans])
+                # Magnetometer
+                mag_x_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_x_mission[~imu_nans])
+                mag_y_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_y_mission[~imu_nans])
+                mag_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_z_mission[~imu_nans])
 
             # If there isn't any points within the mission - skip it
             else:
