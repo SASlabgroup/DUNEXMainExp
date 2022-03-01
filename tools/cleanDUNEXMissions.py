@@ -15,26 +15,27 @@ def computeBeachLocation():
 
     '''
     # load in bathymetry 
-    url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20211021.nc'
-    bathy = nc.Dataset(url)
+    # path = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20211021.nc'
+    path = '../microSWIFT_data/FRFdata/FRF_geomorphology_DEMs_surveyDEM_20211021.nc'
+    bathy = nc.Dataset(path)
     xFRF = bathy['xFRF'][:]
     yFRF = bathy['yFRF'][:]
     xFRF_grid, yFRF_grid = np.meshgrid(xFRF, yFRF)
     elevation = bathy['elevation'][0,:,:]
 
     # Load in water level data
-    # TODO: replace these values with true waterLavel Data instead of predicted once it is posted
-    url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/oceanography/waterlevel/eopNoaaTide/2021/FRF-ocean_waterlevel_eopNoaaTide_202110.nc'
-    waterLevel_dataset = nc.Dataset(url)
+    # url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/oceanography/waterlevel/eopNoaaTide/2021/FRF-ocean_waterlevel_eopNoaaTide_202110.nc'
+    path = '../microSWIFT_data/FRFdata/FRF-ocean_waterlevel_eopNoaaTide_202110.nc'
+    waterLevel_dataset = nc.Dataset(path)
     time = cftime.num2pydate(waterLevel_dataset['time'][:], calendar=waterLevel_dataset['time'].calendar, units=waterLevel_dataset['time'].units)
     # waterLevel_series = waterLevel_dataset['waterLevel'][:]
-    waterLevel_series = waterLevel_dataset['predictedWaterLevel'][:]
+    waterLevel_series = waterLevel_dataset['waterLevel'][:]
 
     # Define empty list for max x values
     beach_x_series = []
     
     # define cross shore buffer
-    buffer = 5 # units are meters
+    buffer = 2 # units are meters
 
     for waterLevel in waterLevel_series:
 
@@ -66,8 +67,8 @@ def main(mission_num=None):
     # Set up logger
     logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', encoding='utf-8', level=logging.DEBUG)
 
-     # Compute beach 
-    # beach_x_series, beach_x_time = computeBeachLocation()
+    # Compute beach 
+    beach_x_series, beach_x_time = computeBeachLocation()
 
     # Load in each mission netCDF and apply masks 
     data_dir = '../microSWIFT_data/cleanedDataset/'
@@ -83,13 +84,10 @@ def main(mission_num=None):
     # Load in mission datset as a netCDF object
     mission_dataset = nc.Dataset(mission_nc_path, mode='a')
 
-    ## From start time find the correct beach_x value 
-    # mission_start = cftime.num2pydate(mission_dataset['time'][0], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
-    # start_time_closest_index = int(np.argmin(np.abs(beach_x_time - mission_start)))
-    # beach_x_during_mission = beach_x_series[start_time_closest_index]
-
-    # For now just set all beach locations at 175 m xFRF
-    beach_x_during_mission = 140
+    # From start time find the correct beach_x value 
+    mission_start = cftime.num2pydate(mission_dataset['time'][0], calendar=mission_dataset['time'].calendar, units=mission_dataset['time'].units)
+    start_time_closest_index = int(np.argmin(np.abs(beach_x_time - mission_start)))
+    beach_x_during_mission = beach_x_series[start_time_closest_index]
 
     # For each microSWIFT on mission
     microSWIFTs_on_mission = list(mission_dataset.groups.keys())
@@ -127,16 +125,29 @@ def main(mission_num=None):
             # Mask from Begininng to start mask end index 
             start_mask_end_index = int(individual_microSWIFT_mask['Start Mask End Index'].item())
             end_mask_start_index = int(individual_microSWIFT_mask['End Mask Start Index'].item())
+            slice_list = []
+            additional_masked_points = []
             if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
-                additional_masked_points = np.array([int(val) for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(',')])
+                # sort between ranges we want to mask and individual points
+                for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(','):
+                    if ':' in val:
+                        slice_list.append(slice(int(val.split(':')[0]), int(val.split(':')[1])))
+                    else:
+                        additional_masked_points.append(int(val))
+
+                # Convert additional points list to numpy array
+                additional_masked_points = np.array(additional_masked_points)
 
             # Mask all indices in the mask list
             for variable in microSWIFT_variables:
                 mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
                 mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
-                if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
+                if len(additional_masked_points) > 0:
                     mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
-    
+                if len(slice_list) > 0:
+                    for inds in slice_list:
+                        mission_dataset[microSWIFT][variable][inds] = np.ma.masked
+
     # Close the dataset
     mission_dataset.close()
 
