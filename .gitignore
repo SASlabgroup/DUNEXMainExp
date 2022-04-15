@@ -207,3 +207,4 @@ writing/._abstract.tex
 *.pdf
 tools/profilingStatsAsText.txt
 writing/Figures/CompositeTrackMap.png
+*.png

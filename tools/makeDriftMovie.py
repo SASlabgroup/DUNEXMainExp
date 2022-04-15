@@ -27,8 +27,9 @@ def main(mission_num=None, filename=None):
 
     # Add the FRF Bathymetry to the map 
     # Data from September 28th, 2021
-    bathy_url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20210928.nc'
-    bathy_dataset = nc.Dataset(bathy_url)
+    # bathy_url = 'https://chlthredds.erdc.dren.mil/thredds/dodsC/frf/geomorphology/DEMs/surveyDEM/data/FRF_geomorphology_DEMs_surveyDEM_20210928.nc'
+    bathy_path = '../microSWIFT_data/FRFdata/FRF_geomorphology_DEMs_surveyDEM_20211021.nc'
+    bathy_dataset = nc.Dataset(bathy_path)
     # Create grid from coordinates
     xFRF_grid, yFRF_grid = np.meshgrid(bathy_dataset['xFRF'][:],bathy_dataset['yFRF'][:])
     bathy = bathy_dataset['elevation'][0,:,:]
@@ -55,12 +56,14 @@ def main(mission_num=None, filename=None):
             ax.plot(mission_dataset[microSWIFT]['xFRF'][0], mission_dataset[microSWIFT]['yFRF'][0], color='r', marker='o')
             ax.plot(mission_dataset[microSWIFT]['xFRF'][:index], mission_dataset[microSWIFT]['yFRF'][:index], color='k')
             ax.plot(mission_dataset[microSWIFT]['xFRF'][index], mission_dataset[microSWIFT]['yFRF'][index], color='g', marker='o')
+            ax.set_xlim(0, 250)
+            ax.set_ylim(330, 430)
         
         # Add title with time
         ax.set_title('Mission {0} - {1}'.format(mission_num, index))
 
     # Creating the Animation object
-    data_skip = 200
+    data_skip = 15
     anim = animation.FuncAnimation(fig, update_tracks, frames=np.arange(0, len(time), data_skip), init_func=init_tracks)
     if filename == None:
         filename = 'mission_{}_drift.gif'.format(mission_num)

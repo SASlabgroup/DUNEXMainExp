@@ -89,12 +89,14 @@ def main(mission_num=None):
     start_time_closest_index = int(np.argmin(np.abs(beach_x_time - mission_start)))
     beach_x_during_mission = beach_x_series[start_time_closest_index]
 
+    if mission_num == 51 or mission_num == 52:
+        beach_x_during_mission = -100 # for mission 51 and 52 since they have been cleaned very throoughyl with hand written notes
+
     # For each microSWIFT on mission
     microSWIFTs_on_mission = list(mission_dataset.groups.keys())
     for microSWIFT in microSWIFTs_on_mission:
         # Get values for cross shore location of microSWIFT
         xFRF = mission_dataset[microSWIFT]['xFRF'][:]
-
 
         # Find first index in the xFRF data that is less than the beach location
         beach_mask_ind = np.where(xFRF <= beach_x_during_mission)
