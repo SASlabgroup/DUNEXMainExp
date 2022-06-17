@@ -207,7 +207,6 @@ writing/._abstract.tex
 *.pdf
 tools/profilingStatsAsText.txt
 writing/Figures/CompositeTrackMap.png
-*.png
 analysis/ahrs_mission_7_microSWIFT_41.mat
 analysis/ahrs_mission_7_microSWIFT_57.mat
 analysis/ahrs_mission18_microSWIFT_4.mat
