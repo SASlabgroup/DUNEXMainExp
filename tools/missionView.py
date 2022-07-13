@@ -77,45 +77,35 @@ def main(mission_num=None, filename=None):
         # ax1.set_ylim([np.nanmin(y)-100, np.nanmax(y)+100])
         ax1.set_title('Drift Track for {}'.format(microSWIFT))
 
-        # Plot the accelerations
+        # Plot the accelerations - Earth Frame
         ax2 = fig.add_subplot(4,2,2)
-        ax2.plot(mission_dataset[microSWIFT]['accel_x'][:], color='g', label='X')
-        ax2.plot(mission_dataset[microSWIFT]['accel_y'][:], color='b', label='Y')
-        ax2.plot(mission_dataset[microSWIFT]['accel_z'][:], color='k', label='Z')
+        ax2.plot(mission_dataset[microSWIFT]['accel_x'][:], color='g', label='accel_x')
+        ax2.plot(mission_dataset[microSWIFT]['accel_y'][:], color='b', label='accel_y')
+        ax2.plot(mission_dataset[microSWIFT]['accel_z'][:], color='k', label='accel_z')
         ax2.set_xlabel('Index')
         ax2.set_ylabel('Acceleration [m/s^2]')
+        ax2.set_title('Accelerations - Earth Frame')
         ax2.legend(bbox_to_anchor=(0,1.04,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
         ax2.set_xlim(0, len(time))
 
-        # Plot the Gyroscope
+        # Plot Velocities - Earth Frame
         ax3 = fig.add_subplot(4,2,4)
-        ax3.plot(mission_dataset[microSWIFT]['gyro_x'][:], color='g', label='X')
-        ax3.plot(mission_dataset[microSWIFT]['gyro_y'][:], color='b', label='Y')
-        ax3.plot(mission_dataset[microSWIFT]['gyro_z'][:], color='k', label='Z')
+        ax3.plot(mission_dataset[microSWIFT]['u'][:], color='g', label='u')
+        ax3.plot(mission_dataset[microSWIFT]['v'][:], color='b', label='v')
+        ax3.plot(mission_dataset[microSWIFT]['w'][:], color='k', label='w')
         ax3.set_xlabel('Index')
-        ax3.set_ylabel('Rotations [degrees/sec]')
-        ax3.set_title('Gyroscope')
+        ax3.set_ylabel('velocity [m/s]')
+        ax3.set_title('Velocities - Earth Frame')
+        ax3.legend(bbox_to_anchor=(0,1.04,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
         ax3.set_xlim(0, len(time))
 
-        # Plot the Magnetometer
+        # Plot Positions - Earth Frame
         ax4 = fig.add_subplot(4,2,6)
-        ax4.plot(mission_dataset[microSWIFT]['mag_x'][:], color='g', label='X')
-        ax4.plot(mission_dataset[microSWIFT]['mag_y'][:], color='b', label='Y')
-        ax4.plot(mission_dataset[microSWIFT]['mag_z'][:], color='k', label='Z')
+        ax4.plot(mission_dataset[microSWIFT]['eta'][:], color='k')
         ax4.set_xlabel('Index')
-        ax4.set_ylabel('Magnetometer [uTeslas]')
-        ax4.set_title('Magnetometer')
+        ax4.set_ylabel('Sea Surface Elevation')
+        ax4.set_title('Sea Surface Elevation')
         ax4.set_xlim(0, len(time))
-
-        # Plot the GPS velocity
-        ax5 = fig.add_subplot(4,2,8)
-        ax5.plot(mission_dataset[microSWIFT]['u'][:], color='g', label='u')
-        ax5.plot(mission_dataset[microSWIFT]['v'][:], color='b', label='v')
-        ax5.set_xlabel('Index')
-        ax5.set_ylabel('velocity [m/s]')
-        ax5.set_title('GPS Velocity')
-        ax5.legend(bbox_to_anchor=(0,1.04,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
-        ax5.set_xlim(0, len(time))
 
         # Figure Properties 
         plt.tight_layout()

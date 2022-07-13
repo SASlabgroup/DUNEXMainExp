@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import netCDF4 as nc
 import cftime
 import datetime
+from scipy import signal
+from scipy import integrate
 
 
 def missionMap(mission_num, mission_dir_path, mission_nc_path):
@@ -95,32 +97,6 @@ def missionMap(mission_num, mission_dir_path, mission_nc_path):
     figure_path = mission_dir_path + 'mission_{}_map.png'.format(mission_num)
     plt.savefig(figure_path)
     return figure_path
-
-def missionAccels():
-    '''
-    @edwinrainville
-
-    Description: This function plots a time series of all accelerations
-    
-    '''
-
-def computeWaveProperties():
-    '''
-    @edwinrainville
-
-    Description: This function computes all bulk wave properties about the field from the drifter tracks during a microSWIFT 
-    mission.
-
-    '''
-
-def reconstructWaveField(mission_dir_path):
-    '''
-    @edwinrainville
-
-    Description: This funnction uses a compressive sensing algorithm to reconstruct a field of waves during a 
-    microSWIFT mission. 
-    '''
-
     
 def transform2FRF(lat,lon):
     '''
@@ -189,3 +165,74 @@ def localCoordinateTransform(lat, lon):
 
     # Return the x and y coordinates 
     return x, y
+
+def computeEta(accel_z):       
+    # Define the filter
+    low_freq_cutoff = 0.05
+    high_freq_cutoff = 2
+    filt_order = 1
+    fs = 12.0
+    b, a = signal.butter(filt_order, [low_freq_cutoff, high_freq_cutoff], btype='bandpass', fs=fs)
+
+    # Zero pad the edges to reduce edge effects
+    pad_size = 500
+    a_z_padded = np.zeros(accel_z.size + pad_size*2)
+    a_z_padded[pad_size:-pad_size] = accel_z
+
+    # Filter and integrate to velocity and position
+    a_z = signal.filtfilt(b, a, a_z_padded)
+    w_nofilt = integrate.cumulative_trapezoid(a_z, dx=1/fs, initial=0)
+    w = signal.filtfilt(b, a, w_nofilt)
+    z_nofilt = integrate.cumulative_trapezoid(w, dx=1/fs, initial=0)
+    z = signal.filtfilt(b, a, z_nofilt)
+
+    # Remove pads and Nan out edges to get rid of edge effects in the signal
+    edge_removed = 100
+    a_z = a_z[pad_size : -pad_size]
+    a_z[:edge_removed] = np.NaN
+    a_z[-edge_removed:] = np.NaN
+    w = w[pad_size : -pad_size]
+    w[:edge_removed] = np.NaN
+    w[-edge_removed:] = np.NaN
+    z = z[pad_size : -pad_size]
+    z[:edge_removed] = np.NaN
+    z[-edge_removed:] = np.NaN
+
+    return w, z
+
+def computeSpectra(z, fs):
+    nperseg = 3600
+    overlap = 0.50
+    f_raw, E_raw = signal.welch(z, fs=fs, window='hann', nperseg=nperseg, noverlap=np.floor(nperseg*overlap))
+
+    # Band Average the Spectra
+    points_to_average = 5
+    num_sections = E_raw.size // points_to_average
+    f_chunks = np.array_split(f_raw, num_sections)
+    E_chunks = np.array_split(E_raw, num_sections)
+    f = np.array([np.mean(chunk) for chunk in f_chunks ])
+    E = np.array([np.mean(chunk) for chunk in E_chunks ])
+    # dof = np.floor(2 * z.shape[0]//nperseg) * points_to_average
+    dof = np.floor(points_to_average * (8/3) * (z.shape[0]/ (nperseg//2)))
+    return f, E, dof
+
+def processZAccel(accel_z, fs, low_freq_cutoff, high_freq_cutoff, order):
+    a_z, w, z = computeEta(accel_z, fs, low_freq_cutoff, high_freq_cutoff, order)
+
+    # Compute the spectra
+    f, E, dof = computeSpectra(z, fs)
+
+    return a_z, w, z, f, E, dof
+
+def computeBulkWaveParameters(f, E):
+    # Compute Significant wave height 
+    f_inds = np.where((f >= 0.04) & (f <= 0.5))[0]
+    f_waves = np.array([f[i] for i in f_inds])
+    E_waves = np.array([E[i] for i in f_inds])
+    E_integrated = integrate.trapezoid(E_waves, f_waves)
+    Hs = 4 * np.sqrt(E_integrated)
+    
+    # Compute Peak Period
+    Tp = 1 / np.squeeze(f_waves[np.where(E_waves == np.amax(E_waves))])
+
+    return Hs, Tp

@@ -8,6 +8,11 @@ import numpy as np
 import pynmea2
 import pandas as pd
 import sys
+import matlab.engine
+import matlab
+
+# Start the matlab engine
+eng = matlab.engine.start_matlab()
 
 # Import local Modules
 sys.path.append('..')
@@ -234,6 +239,19 @@ def main(mission_num=None):
                 mag_y_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_y_mission[~imu_nans])
                 mag_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_z_mission[~imu_nans])
 
+                # Use MATLAB AHRS filter function to correct the accelerations to the earth frame of reference 
+                accel_x_earth, accel_y_earth, accel_z_earth = eng.AHRSAccelCorrection(matlab.double(accel_x_mission.tolist()), matlab.double(accel_y_mission.tolist()), matlab.double(accel_z_mission.tolist()), 
+                    matlab.double(gyro_x_mission.tolist()), matlab.double(gyro_y_mission.tolist()), matlab.double(gyro_z_mission.tolist()), 
+                        matlab.double(mag_x_mission.tolist()), matlab.double(mag_y_mission.tolist()), matlab.double(mag_z_mission.tolist()), nargout=3)
+
+                # Convert all corrected accelerations back to numpy arrays
+                accel_x_earth = np.array(accel_x_earth)
+                accel_y_earth = np.array(accel_y_earth)
+                accel_z_earth = np.array(accel_z_earth)
+
+                # Integrate the vertical acceleration to get the vertical velocity and sea surface elevation
+                vel_z_earth, z_earth = microSWIFTTools.computeEta(accel_z_earth)
+
             # If there isn't any points within the mission - skip it
             else:
                 continue
@@ -409,16 +427,49 @@ def main(mission_num=None):
                 microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
                 # Save IMU data to microSWIFT group
-                # Accelerations
-                accel_x_nc = microSWIFTgroup.createVariable('accel_x', 'f8', ('time',))
+                # Acceleration - Body Frame of Reference
+                accel_x_nc = microSWIFTgroup.createVariable('accel_x_body', 'f8', ('time',))
                 accel_x_nc.units = 'm/s^2'
                 accel_x_nc[:] = accel_x_mission
-                accel_y_nc = microSWIFTgroup.createVariable('accel_y', 'f8', ('time',))
+                accel_y_nc = microSWIFTgroup.createVariable('accel_y_body', 'f8', ('time',))
                 accel_y_nc.units = 'm/s^2'
                 accel_y_nc[:] = accel_y_mission
-                accel_z_nc = microSWIFTgroup.createVariable('accel_z', 'f8', ('time',))
+                accel_z_nc = microSWIFTgroup.createVariable('accel_z_body', 'f8', ('time',))
                 accel_z_nc.units = 'm/s^2'
                 accel_z_nc[:] = accel_z_mission
+
+                # Acceleration - Earth Frame of Reference 
+                accel_x_nc_earth = microSWIFTgroup.createVariable('accel_x', 'f8', ('time',))
+                accel_x_nc_earth.units = 'm/s^2'
+                accel_x_nc_earth[:] = accel_x_earth
+                accel_y_nc_earth = microSWIFTgroup.createVariable('accel_y', 'f8', ('time',))
+                accel_y_nc_earth.units = 'm/s^2'
+                accel_y_nc_earth[:] = accel_y_earth
+                accel_z_nc_earth = microSWIFTgroup.createVariable('accel_z', 'f8', ('time',))
+                accel_z_nc_earth.units = 'm/s^2'
+                accel_z_nc_earth[:] = accel_z_earth
+
+                # Velocity
+                u_nc = microSWIFTgroup.createVariable('u', 'f8', ('time',))
+                u_nc.units = 'm/s'
+                u_nc[:] = gps_u_mission
+                v_nc = microSWIFTgroup.createVariable('v', 'f8', ('time',))
+                v_nc.units = 'm/s'
+                v_nc[:] = gps_v_mission
+                w_nc = microSWIFTgroup.createVariable('w', 'f8', ('time',))
+                w_nc.units = 'm/s'
+                w_nc[:] = vel_z_earth
+
+                # Positions
+                x_frf_nc = microSWIFTgroup.createVariable('xFRF', 'f8', ('time',))
+                x_frf_nc.units = 'meters'
+                x_frf_nc[:] = x
+                y_frf_nc = microSWIFTgroup.createVariable('yFRF', 'f8', ('time',))
+                y_frf_nc.units = 'meters'
+                y_frf_nc[:] = y
+                z_nc = microSWIFTgroup.createVariable('eta', 'f8', ('time',))
+                z_nc.units = 'm'
+                z_nc[:] = z_earth
 
                 # Magnetometer
                 mag_x_nc = microSWIFTgroup.createVariable('mag_x', 'f8', ('time',))
@@ -442,8 +493,6 @@ def main(mission_num=None):
                 gyro_z_nc.units = 'degrees/sec'
                 gyro_z_nc[:] = gyro_z_mission
 
-                # Save GPS data to microSWIFT Group 
-
                 # Lat and Lon
                 lat_nc = microSWIFTgroup.createVariable('lat', 'f8', ('time',))
                 lat_nc.units = 'degrees_north'
@@ -452,32 +501,14 @@ def main(mission_num=None):
                 lon_nc.units = 'degrees_east'
                 lon_nc[:] = lon_interpolated
 
-                # Altitude
-                z_nc = microSWIFTgroup.createVariable('gpsElevation', 'f8', ('time',))
-                z_nc.units = 'degrees_east'
-                z_nc[:] = z_interpolated
-
-                # FRF locations
-                x_frf_nc = microSWIFTgroup.createVariable('xFRF', 'f8', ('time',))
-                x_frf_nc.units = 'meters'
-                x_frf_nc[:] = x
-                y_frf_nc = microSWIFTgroup.createVariable('yFRF', 'f8', ('time',))
-                y_frf_nc.units = 'meters'
-                y_frf_nc[:] = y
-
-                # GPS velocity values
-                u_nc = microSWIFTgroup.createVariable('u', 'f8', ('time',))
-                u_nc.units = 'm/s'
-                u_nc[:] = gps_u_mission
-                v_nc = microSWIFTgroup.createVariable('v', 'f8', ('time',))
-                v_nc.units = 'm/s'
-                v_nc[:] = gps_v_mission
-
     # Close the dataset
     rootgrp.close()
 
     # Return the name of the netCDF that was created
     return ncfile_name
+
+    # Close the matlab engine
+    eng.quit()
 
 # Run the Script
 if __name__=='__main__':
