@@ -256,15 +256,15 @@ def main(mission_num=None):
                 mag_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_z_mission[~imu_nans])
                 
                 # Despike the acceleration, gyroscope and magnetometer measurements
-                accel_x_despike = eng.filloutliers(matlab.double(accel_x_mission.tolist()), 'center', nargout=1)
-                accel_y_despike = eng.filloutliers(matlab.double(accel_y_mission.tolist()), 'center', nargout=1)
-                accel_z_despike = eng.filloutliers(matlab.double(accel_z_mission.tolist()), 'center', nargout=1)
-                gyro_x_despike = eng.filloutliers(matlab.double(gyro_x_mission.tolist()), 'center', nargout=1)
-                gyro_y_despike = eng.filloutliers(matlab.double(gyro_y_mission.tolist()), 'center', nargout=1)
-                gyro_z_despike = eng.filloutliers(matlab.double(gyro_z_mission.tolist()), 'center', nargout=1)
-                mag_x_despike = eng.filloutliers(matlab.double(mag_x_mission.tolist()), 'center', nargout=1)
-                mag_y_despike = eng.filloutliers(matlab.double(mag_y_mission.tolist()), 'center', nargout=1)
-                mag_z_despike = eng.filloutliers(matlab.double(mag_z_mission.tolist()), 'center', nargout=1)
+                accel_x_despike = eng.filloutliers(matlab.double(accel_x_mission.tolist()), 'pchip', nargout=1)
+                accel_y_despike = eng.filloutliers(matlab.double(accel_y_mission.tolist()), 'pchip', nargout=1)
+                accel_z_despike = eng.filloutliers(matlab.double(accel_z_mission.tolist()), 'pchip', nargout=1)
+                gyro_x_despike = eng.filloutliers(matlab.double(gyro_x_mission.tolist()), 'pchip', nargout=1)
+                gyro_y_despike = eng.filloutliers(matlab.double(gyro_y_mission.tolist()), 'pchip', nargout=1)
+                gyro_z_despike = eng.filloutliers(matlab.double(gyro_z_mission.tolist()), 'pchip', nargout=1)
+                mag_x_despike = eng.filloutliers(matlab.double(mag_x_mission.tolist()), 'pchip', nargout=1)
+                mag_y_despike = eng.filloutliers(matlab.double(mag_y_mission.tolist()), 'pchip', nargout=1)
+                mag_z_despike = eng.filloutliers(matlab.double(mag_z_mission.tolist()), 'pchip', nargout=1)
 
                 # Use MATLAB AHRS filter function to correct the accelerations to the earth frame of reference 
                 accel_x_earth, accel_y_earth, accel_z_earth = eng.AHRSAccelCorrection(accel_x_despike, accel_y_despike, accel_z_despike, gyro_x_despike, gyro_y_despike, gyro_z_despike, mag_x_despike, mag_y_despike, mag_z_despike, nargout=3)
@@ -518,7 +518,7 @@ def main(mission_num=None):
             # Save all loaded in data to a microSWIFT subgroup 
             # Check that this microSWIFT has all data before making a subgroup and saving
             if np.all(np.isnan(lat))==False and np.all(np.isnan(lon))==False and np.all(np.isnan(accel_x_despike))==False:
-                if np.count_nonzero(~np.isnan(accel_z_despike)) > 5000: 
+                if np.count_nonzero(~np.isnan(accel_z_despike)) > 2000 or mission_num == 51 or mission_num == 52: 
                     # Create netcdf group for microSWIFT
                     microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
