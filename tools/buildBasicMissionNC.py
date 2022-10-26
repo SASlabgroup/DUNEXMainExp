@@ -25,11 +25,6 @@ def main(mission_num=None):
     TODO: Finish writing docstring
     Description: This script takes all the raw offloaded microSWIFT data and loads it in to a well organized and formatted 
                 netCDF file that can then be easily analyzed for each mission.
-
-    TODO: write version history
-    Versions:
-    1.0.0 - 
-
     '''
     # Define Project Directory 
     project_dir = '../'
@@ -369,8 +364,8 @@ def main(mission_num=None):
                                 gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
                                 if type(gpvtg.spd_over_grnd_kmph) == float:
                                     vel_linenum.append(linenum)
-                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
-                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track - 19))) #units are kmph
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track - 19))) #units are kmph
                             except:
                                 continue
                             
