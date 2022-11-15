@@ -81,7 +81,7 @@ def main(mission_num=None):
     mission_time = np.arange(start_time, end_time, imu_time_step).astype(datetime.datetime)
     mission_time_dim = rootgrp.createDimension('time', len(mission_time))
     mission_time_nc = rootgrp.createVariable('time', 'f8', ('time',))
-    mission_time_nc.units = "hours since 1970-01-01 00:00:00"
+    mission_time_nc.units = "seconds since 1970-01-01 00:00:00"
     mission_time_nc.calendar = "gregorian"
     mission_time_num = nc.date2num(mission_time, units=mission_time_nc.units,calendar=mission_time_nc.calendar)
     mission_time_nc[:] = mission_time_num
@@ -275,6 +275,10 @@ def main(mission_num=None):
                 # Integrate the vertical acceleration to get the vertical velocity and sea surface elevation
                 vel_z_earth, z_earth = microSWIFTTools.computeEta(accel_z_earth)
 
+                # Despike vertical velocity and sea surface elevation 
+                vel_z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(vel_z_earth.tolist()), 'pchip', nargout=1)))
+                z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(z_earth.tolist()), 'pchip', nargout=1)))
+
             # If there isn't any points within the mission - skip it
             else:
                 continue
@@ -405,7 +409,7 @@ def main(mission_num=None):
                 z_sorted_in_mission = z_sorted[inds_in_mission]
 
                 # Interpolate each value onto the overall mission time
-                gps_time_num = nc.date2num(gps_time_in_mission, units="hours since 1970-01-01 00:00:00",calendar="standard") 
+                gps_time_num = nc.date2num(gps_time_in_mission, units="seconds since 1970-01-01 00:00:00",calendar="standard") 
                 
                 # Latitude interpolation and saving to netCDF in the microSWIFT group
                 lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
