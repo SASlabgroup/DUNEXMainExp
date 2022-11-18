@@ -368,8 +368,8 @@ def main(mission_num=None):
                                 gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
                                 if type(gpvtg.spd_over_grnd_kmph) == float:
                                     vel_linenum.append(linenum)
-                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track))) #units are kmph
-                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track))) #units are kmph
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track)) * 0.277) # converting to m/s from km/hr
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track)) * 0.277) # converting to m/s from km/hr
                             except:
                                 continue
                             
@@ -409,7 +409,7 @@ def main(mission_num=None):
                 z_sorted_in_mission = z_sorted[inds_in_mission]
 
                 # Interpolate each value onto the overall mission time
-                gps_time_num = nc.date2num(gps_time_in_mission, units="seconds since 1970-01-01 00:00:00",calendar="standard") 
+                gps_time_num = nc.date2num(gps_time_in_mission, units="seconds since 1970-01-01 00:00:00",calendar="gregorian") 
                 
                 # Latitude interpolation and saving to netCDF in the microSWIFT group
                 lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
