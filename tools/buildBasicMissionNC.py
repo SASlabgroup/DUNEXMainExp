@@ -473,10 +473,12 @@ def main(mission_num=None):
             beach_mask_ind = np.where(x <= max_x)[0].tolist()
 
             # Mask all indices where the microSWIFT is on the beach
-            microSWIFT_variables = [accel_x_despike, accel_y_despike, accel_z_despike, \
-                accel_x_earth, accel_y_earth, accel_z_earth, gps_u_mission, gps_v_mission, vel_z_earth, \
-                    x, y, z_earth, mag_x_mission, mag_y_mission, mag_z_mission, gyro_x_mission, gyro_y_mission, \
-                        gyro_z_mission, lat_interpolated, lon_interpolated]
+            microSWIFT_variables = [accel_x_despike, accel_y_despike, accel_z_despike,
+                                    accel_x_earth, accel_y_earth, accel_z_earth, 
+                                    gps_u_mission, gps_v_mission, vel_z_earth, 
+                                    x, y, z_earth, mag_x_mission, mag_y_mission, 
+                                    mag_z_mission, gyro_x_mission, gyro_y_mission,
+                                    gyro_z_mission, lat_interpolated, lon_interpolated]
             for variable in microSWIFT_variables:
                 for n in beach_mask_ind:
                     variable[n] = np.NaN
@@ -517,7 +519,8 @@ def main(mission_num=None):
             # Save all loaded in data to a microSWIFT subgroup 
             # Check that this microSWIFT has all data before making a subgroup and saving
             if np.all(np.isnan(lat))==False and np.all(np.isnan(lon))==False and np.all(np.isnan(accel_x_despike))==False:
-                if np.count_nonzero(~np.isnan(accel_z_despike)) > 2000 or mission_num == 51 or mission_num == 52: 
+                if (np.count_nonzero(~np.isnan(accel_z_despike)) > 2000 and (np.nanmean(accel_z_despike) > 9) and (np.nanmean(accel_z_despike) < 11)) == True:
+                    # if mission_num == 51 or mission_num == 52: 
                     # Create netcdf group for microSWIFT
                     microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
@@ -563,7 +566,7 @@ def main(mission_num=None):
                     y_frf_nc.units = 'meters'
                     y_frf_nc[:] = y
                     z_nc = microSWIFTgroup.createVariable('eta', 'f8', ('time',))
-                    z_nc.units = 'm'
+                    z_nc.units = 'meters'
                     z_nc[:] = z_earth
 
                     # Magnetometer
