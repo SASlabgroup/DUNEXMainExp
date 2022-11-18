@@ -368,8 +368,8 @@ def main(mission_num=None):
                                 gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
                                 if type(gpvtg.spd_over_grnd_kmph) == float:
                                     vel_linenum.append(linenum)
-                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track - 19))) #units are kmph
-                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track - 19))) #units are kmph
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track))) #units are kmph
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track))) #units are kmph
                             except:
                                 continue
                             
