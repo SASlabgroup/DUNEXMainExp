@@ -409,7 +409,7 @@ def main(mission_num=None):
                 z_sorted_in_mission = z_sorted[inds_in_mission]
 
                 # Interpolate each value onto the overall mission time
-                gps_time_num = nc.date2num(gps_time_in_mission, units="seconds since 1970-01-01 00:00:00",calendar="gregorian") 
+                gps_time_num = nc.date2num(gps_time_in_mission, units=mission_time_nc.units,calendar=mission_time_nc.calendar) 
                 
                 # Latitude interpolation and saving to netCDF in the microSWIFT group
                 lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
