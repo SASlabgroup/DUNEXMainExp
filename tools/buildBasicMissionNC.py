@@ -81,7 +81,7 @@ def main(mission_num=None):
     mission_time = np.arange(start_time, end_time, imu_time_step).astype(datetime.datetime)
     mission_time_dim = rootgrp.createDimension('time', len(mission_time))
     mission_time_nc = rootgrp.createVariable('time', 'f8', ('time',))
-    mission_time_nc.units = "seconds since 1970-01-01 00:00:00"
+    mission_time_nc.units = "hours since 1970-01-01 00:00:00"
     mission_time_nc.calendar = "gregorian"
     mission_time_num = nc.date2num(mission_time, units=mission_time_nc.units,calendar=mission_time_nc.calendar)
     mission_time_nc[:] = mission_time_num
