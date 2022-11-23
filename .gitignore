@@ -130,6 +130,7 @@ dmypy.json
 
 # Ignore microSWIFT data
 microSWIFT_data/
+microSWIFT_data-old/
 ._microSWIFT_data
 ._DUNEXMainExp_MetaData.xlsx
 ._README.pptx
@@ -158,9 +159,7 @@ Drone_Images/
 ~$DUNEXMainExp_notes.xlsx
 .vscode/settings.json
 writing/main.bcf
-.gitignore
 writing/main.run.xml
-.gitignore
 writing/main.synctex.gz
 writing/main.aux
 writing/main.bbl
@@ -168,7 +167,6 @@ writing/main.blg
 writing/main.fdb_latexmk
 writing/main.fls
 writing/main.pdf
-.gitignore
 writing/main.pdf
 ._~$DUNEXMainExp_notes.xlsx
 ._DUNEXMainExp_notes.xlsx
