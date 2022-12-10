@@ -7,8 +7,8 @@ function [accel_x_earth, accel_y_earth, accel_z_earth] = AHRSAccelCorrection(acc
 fs = 12;
 fuse = ahrsfilter('SampleRate', fs,'ReferenceFrame','NED','DecimationFactor',1);
 fuse.AccelerometerNoise = 1e-4; % Noise variance from accelerometer, units are (m/s²)² 
-fuse.GyroscopeNoise = deg2rad(5e0); % Noise variance from gyroscope, units are deg2rad(5e-2) (rad/s)²
-fuse.MagnetometerNoise = 1; % Noise from Magnetometer, units are 0.5 (µT)²
+fuse.GyroscopeNoise = deg2rad(5e0); % Noise variance from gyroscope, units are deg2rad(5e0) (rad/s)²
+fuse.MagnetometerNoise = 1; % Noise from Magnetometer, units are 1 (µT)²
 
 % Organize data structures of accelerations, rotation rates and headings
 accel = transpose([accel_x_body; accel_y_body; accel_z_body]);
