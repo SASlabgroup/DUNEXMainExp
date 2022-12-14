@@ -25,6 +25,11 @@ def main(mission_num=None):
     TODO: Finish writing docstring
     Description: This script takes all the raw offloaded microSWIFT data and loads it in to a well organized and formatted 
                 netCDF file that can then be easily analyzed for each mission.
+
+    TODO: write version history
+    Versions:
+    1.0.0 - 
+
     '''
     # Define Project Directory 
     project_dir = '../'
@@ -81,7 +86,7 @@ def main(mission_num=None):
     mission_time = np.arange(start_time, end_time, imu_time_step).astype(datetime.datetime)
     mission_time_dim = rootgrp.createDimension('time', len(mission_time))
     mission_time_nc = rootgrp.createVariable('time', 'f8', ('time',))
-    mission_time_nc.units = "hours since 1970-01-01 00:00:00"
+    mission_time_nc.units = "seconds since 1970-01-01 00:00:00"
     mission_time_nc.calendar = "gregorian"
     mission_time_num = nc.date2num(mission_time, units=mission_time_nc.units,calendar=mission_time_nc.calendar)
     mission_time_nc[:] = mission_time_num
@@ -368,8 +373,8 @@ def main(mission_num=None):
                                 gpvtg = pynmea2.parse(line)   #grab gpvtg sentence
                                 if type(gpvtg.spd_over_grnd_kmph) == float:
                                     vel_linenum.append(linenum)
-                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(np.deg2rad(gpvtg.true_track)) * 0.277) # converting to m/s from km/hr
-                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(np.deg2rad(gpvtg.true_track)) * 0.277) # converting to m/s from km/hr
+                                    u.append(gpvtg.spd_over_grnd_kmph*np.cos(gpvtg.true_track)) #units are kmph
+                                    v.append(gpvtg.spd_over_grnd_kmph*np.sin(gpvtg.true_track)) #units are kmph
                             except:
                                 continue
                             
@@ -409,7 +414,7 @@ def main(mission_num=None):
                 z_sorted_in_mission = z_sorted[inds_in_mission]
 
                 # Interpolate each value onto the overall mission time
-                gps_time_num = nc.date2num(gps_time_in_mission, units=mission_time_nc.units,calendar=mission_time_nc.calendar) 
+                gps_time_num = nc.date2num(gps_time_in_mission, units="seconds since 1970-01-01 00:00:00",calendar="gregorian") 
                 
                 # Latitude interpolation and saving to netCDF in the microSWIFT group
                 lat_interp_func = interpolate.interp1d(gps_time_num, lat_sorted_in_mission, bounds_error=False, fill_value='NaN')
@@ -473,12 +478,10 @@ def main(mission_num=None):
             beach_mask_ind = np.where(x <= max_x)[0].tolist()
 
             # Mask all indices where the microSWIFT is on the beach
-            microSWIFT_variables = [accel_x_despike, accel_y_despike, accel_z_despike,
-                                    accel_x_earth, accel_y_earth, accel_z_earth, 
-                                    gps_u_mission, gps_v_mission, vel_z_earth, 
-                                    x, y, z_earth, mag_x_mission, mag_y_mission, 
-                                    mag_z_mission, gyro_x_mission, gyro_y_mission,
-                                    gyro_z_mission, lat_interpolated, lon_interpolated]
+            microSWIFT_variables = [accel_x_despike, accel_y_despike, accel_z_despike, \
+                accel_x_earth, accel_y_earth, accel_z_earth, gps_u_mission, gps_v_mission, vel_z_earth, \
+                    x, y, z_earth, mag_x_mission, mag_y_mission, mag_z_mission, gyro_x_mission, gyro_y_mission, \
+                        gyro_z_mission, lat_interpolated, lon_interpolated]
             for variable in microSWIFT_variables:
                 for n in beach_mask_ind:
                     variable[n] = np.NaN
@@ -520,7 +523,7 @@ def main(mission_num=None):
             # Check that this microSWIFT has all data before making a subgroup and saving
             if np.all(np.isnan(lat))==False and np.all(np.isnan(lon))==False and np.all(np.isnan(accel_x_despike))==False:
                 if (np.count_nonzero(~np.isnan(accel_z_despike)) > 2000 and (np.nanmean(accel_z_despike) > 9) and (np.nanmean(accel_z_despike) < 11)) == True:
-                    # if mission_num == 51 or mission_num == 52: 
+                # if np.count_nonzero(~np.isnan(accel_z_despike)) > 2000 or mission_num == 51 or mission_num == 52: 
                     # Create netcdf group for microSWIFT
                     microSWIFTgroup = rootgrp.createGroup('microSWIFT_{}'.format(microSWIFT_num))
 
@@ -566,7 +569,7 @@ def main(mission_num=None):
                     y_frf_nc.units = 'meters'
                     y_frf_nc[:] = y
                     z_nc = microSWIFTgroup.createVariable('eta', 'f8', ('time',))
-                    z_nc.units = 'meters'
+                    z_nc.units = 'm'
                     z_nc[:] = z_earth
 
                     # Magnetometer

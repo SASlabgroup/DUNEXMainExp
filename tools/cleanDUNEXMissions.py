@@ -119,36 +119,39 @@ def main(mission_num=None):
     if type(microSWIFTs_masked_on_mission[0]) == str:
         for microSWIFT in microSWIFTs_masked_on_mission:
             # Get list of microSWIFT Varaibles
-            microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
+            try:
+                microSWIFT_variables = list(mission_dataset[microSWIFT].variables.keys())
 
-            # Get the mask values from spreadsheet 
-            individual_microSWIFT_mask = mission_masks[mission_masks['microSWIFT ID'] == microSWIFT]
+                # Get the mask values from spreadsheet 
+                individual_microSWIFT_mask = mission_masks[mission_masks['microSWIFT ID'] == microSWIFT]
 
-            # Mask from Begininng to start mask end index 
-            start_mask_end_index = int(individual_microSWIFT_mask['Start Mask End Index'].item())
-            end_mask_start_index = int(individual_microSWIFT_mask['End Mask Start Index'].item())
-            slice_list = []
-            additional_masked_points = []
-            if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
-                # sort between ranges we want to mask and individual points
-                for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(','):
-                    if ':' in val:
-                        slice_list.append(slice(int(val.split(':')[0]), int(val.split(':')[1])))
-                    else:
-                        additional_masked_points.append(int(val))
+                # Mask from Begininng to start mask end index 
+                start_mask_end_index = int(individual_microSWIFT_mask['Start Mask End Index'].item())
+                end_mask_start_index = int(individual_microSWIFT_mask['End Mask Start Index'].item())
+                slice_list = []
+                additional_masked_points = []
+                if individual_microSWIFT_mask['Additional Masking indices'].item() != 0:
+                    # sort between ranges we want to mask and individual points
+                    for val in individual_microSWIFT_mask['Additional Masking indices'].item().split(','):
+                        if ':' in val:
+                            slice_list.append(slice(int(val.split(':')[0]), int(val.split(':')[1])))
+                        else:
+                            additional_masked_points.append(int(val))
 
-                # Convert additional points list to numpy array
-                additional_masked_points = np.array(additional_masked_points)
+                    # Convert additional points list to numpy array
+                    additional_masked_points = np.array(additional_masked_points)
 
-            # Mask all indices in the mask list
-            for variable in microSWIFT_variables:
-                mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
-                mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
-                if len(additional_masked_points) > 0:
-                    mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
-                if len(slice_list) > 0:
-                    for inds in slice_list:
-                        mission_dataset[microSWIFT][variable][inds] = np.ma.masked
+                # Mask all indices in the mask list
+                for variable in microSWIFT_variables:
+                    mission_dataset[microSWIFT][variable][:start_mask_end_index] = np.ma.masked
+                    mission_dataset[microSWIFT][variable][end_mask_start_index:] = np.ma.masked
+                    if len(additional_masked_points) > 0:
+                        mission_dataset[microSWIFT][variable][additional_masked_points] = np.ma.masked
+                    if len(slice_list) > 0:
+                        for inds in slice_list:
+                            mission_dataset[microSWIFT][variable][inds] = np.ma.masked
+            except: 
+                continue
 
     # Close the dataset
     mission_dataset.close()

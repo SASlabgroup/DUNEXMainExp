@@ -9,5 +9,3 @@ Setting up DUNEX virtual python environment:
     MacOS: source .dunex-venv/bin/activate
     Windows: .dunex-venv\Scripts\activate.bat
 5. Now install all required modules using: pip install -r dunex-venv-requirements.txt
-
-This is a test
