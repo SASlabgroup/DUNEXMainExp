@@ -81,6 +81,9 @@ def build_final_nc(mission_num):
     trajectory_nc = rootgrp.createVariable('trajectory', np.intc, ('trajectory',))
     trajectory_nc.cf_role = 'trajectory_id'
     trajectory_nc.long_name = 'trajectory name'
+    trajectory_nc.description = 'microSWIFT drift track ID. The ID number is ' \
+                                'the same as the ID number of the microSWIFT ' \
+                                'wave bouy.'
     trajectory_nc[:] = microSWIFT_nums
 
     # Add sampling frequency information to the netcdf file
