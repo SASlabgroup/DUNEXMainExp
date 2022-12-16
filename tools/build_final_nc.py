@@ -11,8 +11,12 @@ def main():
     """
     Runs the buildFinalNC function to test.
     """
-
-    build_final_nc(mission_num=1)
+    missions = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
+                23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+                41,42,43,44,45,46,48,50,51,52,54,56,58,59,60,61,62,63,
+                66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81]
+    for mission in missions:
+        build_final_nc(mission_num=mission)
 
 def build_final_nc(mission_num):
     """
@@ -463,18 +467,18 @@ def mission_metadata(rootgrp, mission_num):
     rootgrp.deployment_notes = dunex_xlsx['Deployment Notes'].iloc[mission_num]
 
     # Get data cleaning notes
-    dunex_df = pd.read_excel('../DUNEXMainExp_notes.xlsx', 'microSWIFT Masks')
-    dunex_df['Mission Number'] = pd.Series(dunex_df['Mission Number']).fillna(method='ffill')
-    mission_masks = dunex_df[dunex_df['Mission Number'] == mission_num]
-    cleaning_notes = list(mission_masks[mission_masks['Mission Number'] == mission_num]['Notes'])
-    total_notes = ''
-    for note in cleaning_notes:
-        if isinstance(note, str):
-            total_notes += note
-            total_notes += ' '
-        else:
-            continue
-    rootgrp.data_cleaning_notes = total_notes
+    # dunex_df = pd.read_excel('../DUNEXMainExp_notes.xlsx', 'microSWIFT Masks')
+    # dunex_df['Mission Number'] = pd.Series(dunex_df['Mission Number']).fillna(method='ffill')
+    # mission_masks = dunex_df[dunex_df['Mission Number'] == mission_num]
+    # cleaning_notes = list(mission_masks[mission_masks['Mission Number'] == mission_num]['Notes'])
+    # total_notes = ''
+    # for note in cleaning_notes:
+    #     if isinstance(note, str):
+    #         total_notes += note
+    #         total_notes += ' '
+    #     else:
+    #         continue
+    # rootgrp.data_cleaning_notes = total_notes
 
 def save_var_in_final_style(var_name,
                             nc_var,
