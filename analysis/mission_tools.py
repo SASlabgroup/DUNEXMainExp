@@ -56,7 +56,7 @@ def plot_mission_tracks(mission_dataset, bathy_file):
     ax.set_aspect('equal')
     ax.set_xlabel('Cross Shore Location [meters]')
     ax.set_ylabel('Along Shore Location [meters]')
-    ax.plot([100,800],[505,505], linewidth=2, color='r')
+    ax.plot([50,591],[510,510], linewidth=2, color='r')
 
 def plot_mission_eta(mission_dataset):
     """
@@ -182,7 +182,7 @@ def plot_wave_locations(wave_x_locs, wave_y_locs, bathy_file, color):
     ax.set_aspect('equal')
     ax.set_xlabel('Cross Shore Location [meters]')
     ax.set_ylabel('Along Shore Location [meters]')
-    ax.plot([100,800],[505,505], linewidth=2, color='r')
+    ax.plot([50,591],[510,510], linewidth=2, color='r')
 
 def plot_wave_height_dist(wave_heights, num_bins):
     """

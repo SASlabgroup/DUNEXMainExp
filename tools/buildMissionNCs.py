@@ -13,14 +13,15 @@ from tools import missionView
 from tools import makeDriftMovie
 
 def main():
-    '''
-    @edwinrainville
-
-    Description: Build and clean the basic mission datasets.
-    TODO: Finish writing description
-    '''
+    """
+    build the cleaned netCDF files from the raw data and clean the files.
+    This function also plots many variables from each microSWIFT on each
+    mission to they can be analyzed and thoroughly checked through for
+    errors.
+    """
     # Set up logger
-    logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log', filemode='w', encoding='utf-8', level='INFO')
+    logging.basicConfig(filename='../microSWIFT_data/cleanedDataset/build_dataset.log'
+                        , filemode='w', encoding='utf-8', level='INFO')
 
     # List of Mission to build for whole dataset
     # skips 6, 47, 49, 53, 55, 57, 64, 65 since they were removed from the dataset
@@ -28,15 +29,13 @@ def main():
     #                 23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
     #                 41,42,43,44,45,46,48,50,51,52,54,56,58,59,60,61,62,63,
     #                 66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81]
-    mission_list = [26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,
-                    45,46,48,50,51,52,54,56,58,59,60,61,62,63,66,67,68,69,70,
-                    71,72,73,74,75,76,77,78,79,80,81]
+    mission_list = [78]
     # start timer for entire dataset build
     start_build = datetime.datetime.utcnow()
     
     # Loop through each mission and build netCDF files
     for mission_num in mission_list:
-        # Build a netCDF for the mission that has only raw time values read in 
+        # Build a netCDF for the mission that has only raw time values read in
         logging.info('building mission {}'.format(mission_num))
         tic = datetime.datetime.utcnow()
         mission_nc_path = buildBasicMissionNC.main(mission_num=mission_num)

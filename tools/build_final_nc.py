@@ -11,16 +11,17 @@ def main():
     """
     Runs the buildFinalNC function to test.
     """
-    missions = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
-                23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-                41,42,43,44,45,46,48,50,51,52,54,56,58,59,60,61,62,63,
-                66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81]
+    # missions = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
+    #             23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+    #             41,42,43,44,45,46,48,50,51,52,54,56,58,59,60,61,62,63,
+    #             66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81]
+    missions = [78]
     for mission in missions:
         build_final_nc(mission_num=mission)
 
 def build_final_nc(mission_num):
     """
-    Function that builds a netCDF file from the varaibles processed in
+    Function that builds a netCDF file from the variables processed in
     each mission. These netCDF files are compliant with the CF-1.6
     conventions. Each microSWIFT track will be treated as a trajectory
     with a trajectory id for the microSWIFT number.
@@ -87,7 +88,7 @@ def build_final_nc(mission_num):
     trajectory_nc.long_name = 'trajectory name'
     trajectory_nc.description = 'microSWIFT drift track ID. The ID number is ' \
                                 'the same as the ID number of the microSWIFT ' \
-                                'wave bouy.'
+                                'wave buoy.'
     trajectory_nc[:] = microSWIFT_nums
 
     # Add sampling frequency information to the netcdf file

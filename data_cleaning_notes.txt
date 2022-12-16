@@ -55,9 +55,9 @@ Mission 11(Cleaned on 01/26/22): Adjusted start time from 2021-10-07T15:10:00 to
                                  Deleted microSWIFT 41 from dataset since it is missing almost all GPS data and therefore we can't use it.
                                  microSWIFT 34 was still on the jetski and was not deployed until about 2.7 minutes (index 2000) after the other so it is individually being masked from the beginning
 
-Mission 12(Cleaned on 01/26/22): Adjusted start time from 2021-10-07T16:00:00 to 2021-10-07T16:05:30 since the microSWIFTs do not have a wave signal until this index (mostlyflat signal)
+Mission 12(Cleaned on 01/26/22): Adjusted start time from 2021-10-07T16:00:00 to 2021-10-07T16:05:30 since the microSWIFTs do not have a wave signal until this index (mostly flat signal)
                                  Adjusted end time from 2021-10-07T16:30:00 to 2021-10-07T16:21:00 since all microSWIFTs have reached the beach by this point.
-                                 microSWIFT 57 has one spot at the end of the time series that isnt getting masked after index 10000 so we will manually mask it
+                                 microSWIFT 57 has one spot at the end of the time series that isn't getting masked after index 10000 so we will manually mask it
 
 Mission 13(Cleaned on 01/26/22): Adjusted start time from 2021-10-07T17:00:00 to 2021-10-07T17:02:45 since the microSWIFTs were all still stationary on the pier until this time.
                                  Adjusted end time from 2021-10-07T17:25:00 to 2021-10-07T17:23:00 since all of the microSWIFTs had reached the beach before this point.
@@ -69,6 +69,7 @@ Mission 14(Cleaned on 01/26/22): Adjusted start time from 2021-10-07T18:00:00 to
 
 Mission 15(Cleaned on 01/26/22): Adjusted end time from 2021-10-08T13:46:00 to 2021-10-08T13:38:00 since almost all microSWIFTs reached the beach before that time.
                                  (11/13/22) Removed microSWIFTs 46, 39, 38, 16, and 29 from the dataset due to large spikes and nonphysical signals
+                                 microSWIFT 14 was masked from index 14000 to the end since it had reached to beach and rolled back out.
 
 Mission 16(Cleaned on 01/26/22): Adjusted the start time from 2021-10-08T14:05:00 to 2021-10-08T14:10:30 since most the microSWIFTs were not in the water at this point as seen by a mostly flat signal in all IMU measurements.
                                  Adjusted the end time from 2021-10-08T14:46:00 to 2021-10-08T14:32:00 since all of the microSWIFTs had made it to the beach at this point.
@@ -81,7 +82,8 @@ Mission 16(Cleaned on 01/26/22): Adjusted the start time from 2021-10-08T14:05:0
                                  Removed microSWIFT 34 since it has only a very small amount of data mostly before any of the others were deployed
                                  Removed microSWIFT 33 since it has only a very small amount of data mostly before any of the others were deployed
                                  (11/13/22) Removed microSWIFT 11 due to large spikes and nonphysical signals
-
+                                 microSWIFT 38 is masked from index 7000 to the end since it has large spikes that are non-physical.
+                                 
 Mission 17(Cleaned on 01/26/22): Adjusted start time from 2021-10-08T15:00:00 to 2021-10-08T15:04:30 since most of the microSWIFTs are still on the jetski at this point as we can see be a non-wave looking IMU signal.
                                  Adjusted end time from 2021-10-08T16:00:00 to 2021-10-08T15:25:00 since most of the microSWIFTs reached the beach by this point.
                                  Removed microSWIFT 46 since it is missing all x_FRF values meaning it did not have good GPS data.
@@ -93,10 +95,13 @@ Mission 18(Cleaned on 01/26/22): Adjusted start time from 2021-10-08T17:00:00 to
                                  Adjusted end time from 2021-10-08T18:00:00 to 2021-10-08T17:42:00 since all of the microSWIFTs have reached the beach at this point.
                                  microSWIFT 12 is masked from index 20000 to the end since it has reached the beach and potentially rolled back down briefly. 
                                  (11/13/22) Removed microSWIFTs 46, 41, 37, 44, 43, 16, 42, 34, and 33 then masked 5 from 0 to index 1000 all due to non-physical spikes in the data
+                                 microSWIFT_29 was masked from the start to index 1000 since there is a massive sea surface elevation spike that is not even remotely physical.
 
 Mission 19(Cleaned on 01/26/22): Adjusted end time from 2021-10-08T19:00:00 to 2021-10-08T18:46:00 since all the microSWIFTs made it to the beach before this time.
                                  microSWIFT 42 is missing the magnetometer measurements and all measurements are zeros
                                  (11/12/22) Removed microSWIFTs 46, 41, 37, 44, 43, 16, 42, and 56 the masked 29 from start to index 1000 due to nonphysical signals
+                                 microSWIFT_29 was masked from the start to index 1000 since there is a massive sea surface elevation spike that is not even remotely physical.
+                                 microSWIFT_5 masked from index 19000 to end due to large spike at the end.
 
 Mission 20(Cleaned on 01/26/22): Adjusted end time from 2021-10-10T13:27:00 to 2021-10-10T13:18:15 since almost all microSWIFTs had made it to the beach at that point.
                                  Note that microSWIFTs 31 and 58 have bad gyros - may need to be Removed
@@ -111,7 +116,7 @@ Mission 21(Cleaned on 01/26/22):  Adjusted end time from 2021-10-10T14:36:00 to 
 
 Mission 22(Cleaned on 01/26/22): Adjusted end time from 2021-10-10T15:27:00 to 2021-10-10T15:15:30 since all the microSWIFTs reached the beach before this point.
                                  Note that microSWIFT 58 has a bad gyro - may need to be Removed
-                                 Notethat microSWIFT 31 has a bad magnetometer since it has mostly flat readings
+                                 Note that microSWIFT 31 has a bad magnetometer since it has mostly flat readings
                                  microSWIFT 13 looks like it made it to the beach with flat IMU signals but is not masked by the spatial mask.
                                  (11/13/22) Removed microSWIFTs 49 and 16 due to non-physical signals
 
@@ -120,12 +125,15 @@ Mission 23(Cleaned on 01/26/22): Adjusted start time from 2021-10-10T16:05:30 to
                                  Removed microSWIFT 58 since it has a bad gyro
                                  Removed microSWIFT 16 since it was missing GPS data
                                  (11/13/22) Removed microSWIFT 26 and masked microSWIFTs 40, 23, and 57 from start to index 500 due to large spikes the beginning of mission
+                                 microSWIFT_46 masked from start to index 500 due to large spike from deployment.
 
 Mission 24(Cleaned on 01/26/22): Adjusted start time from 2021-10-11T13:05:00 to 2021-10-11T13:13:00 since most microSWIFTs haven't been deployed yet and we can see it in the flat signal.
                                  Adjusted end time from 2021-10-11T13:47:00 to 2021-10-11T13:30:00 since the microSWIFTs have all made it to the beach before this.
                                  Removed microSWIFT 12 since the IMU was not working and all signals were flat
                                  Removed microSWIFT 31 since it was missing a bunch of GPS data
                                  (11/14/22) Masked microSWIFT 37 and 36 from start to index 500 due to initial large spikes 
+                                 microSWIFT_37 masked from the start to index 1000 due to a massive spike from deployment.
+                                 microSWIFT_35 masked from index 4500 to end due to weird, flat and non-physical sea-surface elevation
 
 Mission 25(Cleaned on 01/26/22): Adjusted start time from 2021-10-11T14:10:00 to 2021-10-11T14:11:00 since many of the microSWIFTs hadnt been deployed yet as seen by flat signals from the IMU.
                                  Adjusted end time from 2021-10-11T14:50:00 to 2021-10-11T14:33:00 since almost all the microSWIFTs made it to the beach before this time so it the time that the array is most coherent.
@@ -137,6 +145,11 @@ Mission 26(Cleaned on 01/27/22): Adjusted end time from 2021-10-11T17:00:00 to 2
                                  Note: magnetometer on microSWIFT 35 not working         
                                  Removed microSWIFT 58 since it has a bad gyro
                                  (11/14/22)  Removed microSWIFTs 23, 17, and 20 then adjusted start time from 2021-10-11T16:05:00 to 2021-10-11T16:06:00 due to many microSWIFTs have large spikes meaning they were being deployed 
+                                 microSWIFT_24 masked from start to index 500 due to a large spike in sea surface elevation.
+                                 microSWIFT_4 masked from start to index 500 due to a large spike in sea surface elevation.
+                                 microSWIFT_57 masked from start to index 500 due to a large spike in sea surface elevation.
+                                 microSWIFT_8 masked from start to index 500 due to a large spike in sea surface elevation.
+                                 microSWIFT_29 masked from start to index 500 due to a large spike in sea surface elevation.
 
 Mission 27(Cleaned on 01/28/22): Mask microSWIFT 27 from the start to index 100 since it looks like just a bit of the drop is included right at the beginning.
                                  Mask microSWIFTs 28, 56, 4, 34 and 50 from index 20000 to the end since it looks like they all made it to the beach and breaifly rolled back down 
@@ -152,7 +165,8 @@ Mission 28(Cleaned on 01/28/22): Adjusted start time from 2021-10-12T13:10:00 to
                                  Removed microSWIFT 58 since it is missing GPS data
                                  Removed microSWIFT 13, 24 and 57 from dataset since they hit the beach before anything else was deployed and had almost no data.
                                  (11/14/22) Adjusted start time from 2021-10-12T13:22:00 to 2021-10-12T13:24:00 to get rid of non-physical large spikes at beginning of deployment
-                                 
+                                 microSWIFT_28 masked from start to index 500 due to large non-physical spike from deployment.
+
 Mission 29(Cleaned on 01/28/22): Adjusted start time from 2021-10-13T13:00:00 to 2021-10-13T13:10:00 since all of the microSWIFTs were still on the jetski at this point which can be seen by the location and non-wave like IMU signals.
                                  Adjusted end time from 2021-10-13T13:35:00 to 2021-10-13T13:30:00 since all of the microSWIFTs made it to the beach by this point as seen by the signals being cutoff by the spatial mask.
                 
@@ -210,7 +224,9 @@ Mission 36(Cleaned on 02/23/22): Adjusted start time from 2021-10-14T14:00:00 to
                                  Masked microSWIFT 43 from index 3000 to the end since it reached the beach and rolled back down into the water afterwards.
                                  Removed microSWIFT 58 since it had a bad gyroscope measurement seen by completely flat lines
                                  Masked microSWIFT 33 from the start to index 500 since it had very small signals at this point suggesting that it had not been deployed yet.
-
+                                 microSWIFT_34 masked from start to index 500 due to a non-physical large spike from the deployment.
+                                 microSWIFT_35 masked from index 5000 to the end since it reached the beach and rolled back into the water.
+                                
 Mission 37(Cleaned on 02/23/22): Adjusted start time from 2021-10-14T15:09:00 to 2021-10-14T15:14:20 since the microSWIFTs were still on the jetski at this point as seen by intense clustering and fast movements
                                  Adjusted end time from 2021-10-14T15:14:30 to 2021-10-14T15:20:00 since almost all of the microSWIFTs had made it to the beach at this point as seen by the sptail threshold cutting off the remaining data points
                                  Removed microSWIFT 18 since it is missing GPS data during this mission
@@ -243,7 +259,8 @@ Mission 38(Cleaned on 02/24/22): Adjusted end time from 2021-10-14T17:50:00 to 2
                                  Masked microSWIFT 34 from the start to index 1000 since the microSWIFT is still on the jetski seen by moving alongshore at a non drifting speed
                                  Masked microSWIFT 33 from the start to index 2000 since the microSWIFT is still on the jetski seen by moving alongshore at a non drifting speed
                                  Masked microSWIFT 23 from the start to index 1000 since the microSWIFT is still on the jetski seen by moving alongshore at a non drifting speed
-
+                                 microSWIFT_35 masked from start to index 1000 due to a non-physical spike.
+                                 
 Mission 39(Cleaned on 02/25/22): Adjusted start time from 2021-10-15T16:00:00 to 2021-10-15T16:12:30 since the microSWIFTs had not yet been deployed at this point as seen by the 
                                  Adjusted end time from  2021-10-15T17:00:00 to 2021-10-15T16:27:00 since all of the microSWIFTs were being picked up by the people on surfboards at this point
                                  Masked microSWIFT 14 from inex 8000 to the end since it had been picked up by the surfboards at this point as seen by the dampened acceleration signals
@@ -260,6 +277,8 @@ Mission 40(Cleaned on 03/01/22): Adjusted the start time from 2021-10-15T17:00:0
                                  Masked microSWIFT 19 from index 20000 to the end since it had been picked up by the surfboard at this point
                                  Masked microSWIFT 31 from index 15000 to the end since it had been picked up by the surfboard at this point
                                  Masked microSWIFT 46 from index 15000 to the end since it had been picked up by the surfboard at this point
+                                 microSWIFT_60 masked from start to index 1000 due to non-physical larger signal.
+                                 Removed microSWIFT_59 due to not enough data and bad signal.
 
 Mission 41(Cleaned on 02/25/22): Adjusted start time from 2021-10-17T12:15:00 to 2021-10-17T12:16:30 the microSWIFTs were still on the jetksi seen by the intense clustering and fast movement over to the deployment location
                                  Adjusted the end time from 2021-10-17T13:00:00 to 2021-10-17T12:23:00 since all of the microSWIFTs had reached the beach at this point except for one that moved very far from the domain.
@@ -289,13 +308,17 @@ Mission 43(Cleaned on 02/25/22): Removed microSWIFT 31 since it is missing GPS d
                                  Masked microSWIFT 14 from the start to index 28000 since it had all flat , non-flucatuating values up until that point
                                  Masked microSWIFT 23 from the start to index 3000 since it had all flat , non-flucatuating values up until that point
                                  Masked microSWIFT 3 from the start to index 1000 since it had all flat , non-flucatuating values up until that point
-                                 Masked microSWIFT 2 from the start to index 500 since it had all flat , non-flucatuating values up until that point
+                                 Masked microSWIFT 2 from the start to index 1000 due to a large spike from deployment
                                  Masked microSWIFT 46 from the start to index 3000 since it had all flat , non-flucatuating values up until that point
+                                 microSWIFT_13 masked from start to index 1000 due to large spike at the start of the mission.
+                                 Removed microSWIFT_36 due to acceleration values being orders of magnitude too high
+                                 microSWIFT_16 masked from index 20000 to the end due to non-fluctuating values.
+                                 microSWIFT_29 masked from start to index 1000 due to large acceleration spike from deployment.
 
 Mission 44(Cleaned on 02/25/22): Adjusted the start time from 2021-10-18T13:09:00 to 2021-10-18T13:11:00 since some of the microSWIFTs were still on the pier at this point as seen by non flucuating accelerations
                                  Adjusted the end time from 2021-10-18T15:50:00 to 2021-10-18T13:50:00 since the microSWIFTs started leaving the domain and started being picked up by the people on surfbaords shortly after this time.
                                  Removed microSWIFT 10 since it had a lot of time where the IMU data stopped
-                                 Masked microSWIFT 20 from the start to index 2000 since the IMU was not recording until this point as seen by completely flat signals until index 2000
+                                 Removed microSWIFT 20 since it has a bad drifting accelerometer.
 
 Mission 45(Cleaned on 02/25/22): Adjusted the start time from 2021-10-18T17:15:00 to 2021-10-18T17:19:00 since the microSWIFTs had not been deployed yet as seen by flat/ dampened IMU signals and almost stationary GPS signals
                                  Adjusted the end time from 2021-10-18T18:30:00 to 2021-10-18T17:40:00 since most of the microSWIFTs made it to the beach and the rest started being picked up at this point
@@ -362,8 +385,7 @@ Mission 51(Cleaned on 04/5/22): Adjusted the start time from 2021-10-22T14:00:00
                                 in water - 14:41:30 (masked from 29736:29880) - in breaker (time not noted)
                                 out of water - 14:42:22 (masked from 30504:end)
 
-Mission 52(Cleaned on 03/16/22):
-** Needs to be finished 
+Mission 52(Cleaned on 03/16/22): Leave alone for specific analysis with more detailed notes
 
 Mission 53(Cleaned on 03/08/22): Removed from the dataset since this was not a "real" deployment - we were testing to see the differences if we switched the accelerometer range from +-2g to +-4g
 
@@ -381,6 +403,8 @@ Mission 55(Cleaned on 02/28/22): Many are missing data and is a tiny mission
 Mission 56(Cleaned on 02/28/22): Adjusted the start time from 2021-10-25T17:10:00 to 2021-10-25T17:17:00 since most of the microSWIFTs were still being paddled out and placed in their array formation
                                  Adjusted the end time from 2021-10-25T18:24:00 to 2021-10-25T17:50:00 since almost all the microSWIFTs made it to the beach in this amount of time
                                  Removed microSWIFT 4 since it is missing all IMU data during the mission
+                                 microSWIFT_18 masked from index 22000 to the end due to a large spike most likely from hitting the beach.
+                                 microSWIFT_2 masked from start to index 1000 due to a large spike from deployment.
 
 Mission 57(Cleaned on 03/08/22): tiny mission from the jetksi since they were thrown so close to shore that they almost immediately washed up on the beach - removed from cleaned dataset since it had such a small amount of data
 
@@ -439,15 +463,16 @@ Mission 64(Cleaned on 02/28/22): Removed mission 64 since most of the microSWIFT
 Mission 65(Cleaned on 02/28/22): Removed this mission from the cleaned dataset since it had almost no data since the microSWIFTs were deployed so close to the shore
 
 Mission 66(Cleaned on 02/28/22): Removed microSWIFT 48 since it is missing GPS data and IMU data during the mission
-                                 Masked microSWIFT 23 from index 2800 to the end since it passed the spatial threshold then moved back across at this point 
-                                 Masked microSWIFT 64 from the start to index 1100 since it was not recroding until this point as seen by a complelely straight line which indicates spurious interpolation
+                                 Masked microSWIFT 23 from start to index 500 and index 2800 to the end since it passed the spatial threshold then moved back across at this point
+                                 Masked microSWIFT 64 from the start to index 1100 since it was not recording until this point as seen by a completely straight line which indicates spurious interpolation
                                  Masked microSWIFT 10 from the start to index 500 since it had not yet been deployed from the pier
-                                 Masked microSWIFT 61 from index 4000 to the end since the remaining measurements were completely flat indicating it was on the beach or stationary
+                                 Masked microSWIFT 61 from start to index 1000 and index 4000 to the end since the remaining measurements were completely flat indicating it was on the beach or stationary
                                  Masked microSWIFT 29 from the start to index 500 since it had not yet been deployed from the pier
-                                 Masked microSWIFT 38 from the start to index 1200 since it was not recroding until this point as seen by a complelely straight line which indicates spurious interpolation
+                                 Masked microSWIFT 38 from the start to index 1200 since it was not recording until this point as seen by a completely straight line which indicates spurious interpolation
                                  Masked microSWIFT 30 from the start to index 500 since it had not yet been deployed from the pier
                                  Masked microSWIFT 3 from the start to index 200 since it had not been deployed yet and from index 2500 to the end since it reached the beach and then crossed back across the spatial mask threshold
                                  Masked microSWIFT 12 from index 3000 to the end since it passed the spatial threshold then moved back across at this point 
+                                 Removed microSWIFT 29 since it does not have enough data and leads to large spiky values.
 
 Mission 67(Cleaned on 02/28/22): Adjusted the start time from 2021-10-28T14:27:00 to 2021-10-28T14:30:00 since the microSWIFTs were still being deployed at this point from the pier as seen by movement along the pier
                                  Adjusted the end time from 2021-10-28T14:50:00 to 2021-10-28T14:46:00 since all of the microSWIFTs made it to the beach by this time
@@ -455,9 +480,11 @@ Mission 67(Cleaned on 02/28/22): Adjusted the start time from 2021-10-28T14:27:0
                                  Masked microSWIFT 30 from index 3500 to the end since it passed the spatial threshold then passed back over it 
                                  Masked microSWIFT 60 from index 8100 to the end since it stopped recording properly at this point as seen by non fluctuating signals 
                                  Masked microSWIFT 29 from index 10000 to the end which has a few values that did not get masked properly
-                                 Masked microSWIFT 72 from index 4200 to the end since it stopped recording proerly as seen by flat and non-fluctuating values due to weird interpolations
+                                 Masked microSWIFT 72 from index 4200 to the end since it stopped recording properly as seen by flat and non-fluctuating values due to weird interpolations
+                                 microSWIFT_23 masked from start to index 1000 due to initial spike.
+                                 Removed microSWIFT 66 since it doesn't have enough data and leads to spiky results. 
 
-Mission 68(Cleaned on 02/28/22): Adjusted the start time from 2021-10-28T15:30:00 to 2021-10-28T15:34:00 since most to the microSWIFTs were not in thewater until this point
+Mission 68(Cleaned on 02/28/22): Adjusted the start time from 2021-10-28T15:30:00 to 2021-10-28T15:34:00 since most to the microSWIFTs were not in the water until this point
                                  Adjusted the end time from 2021-10-28T16:20:00 to 2021-10-28T15:50:00 so that we do not have to have the 10 minute data gap and many of the microSWIFTs had already made it to the beach at this point
                                  Removed microSWIFT 58 since it had a bad gyroscope
                                  Masked microSWIFT 23 from index 10000 to the end since it was no longer recording as seen by completely flat signals
@@ -469,6 +496,8 @@ Mission 69(Cleaned on 01/28/22): Adjusted the start time from 2021-10-28T17:05:0
                                  Note that microSWIFT 58 has bad gyroscope data - may need to be removed
                                  Mask microSWIFT 59 from the start to index 1800 since it had not been deployed yet as seen by stationary, nonfluctuating signals.
                                  Mask microSWIFT 57 from index 6000 to end since it reached the beach then rolled back down slightly.
+                                 microSWIFT_24 masked from index 8000 to the end since it has a large non-physical spike at the end most likely due to hitting the beach.
+                                 Removed microSWIFT_72 since it doesn't have any data.
 
 Mission 70(Cleaned on 01/28/22): Adjusted start time from 2021-10-28T17:40:00 to 2021-10-28T17:41:00 since most microSWIFTs had not been deployed yet as seen by flat IMU signals.
                                  Adjusted end time from 2021-10-28T17:50:00 to 2021-10-28T17:45:00 since all microSWIFTs had made it to the beach at this point.
@@ -485,18 +514,21 @@ Mission 72(Cleaned on 02/14/22): Removed microSWIFT 48 since it is missing GPS d
                                  Masked microSWIFT 49 from index 7000 to the end since it reached the beach indicated by a stationary acceleration signal and it wasnt cut off by the spatial mask
                                  Removed microSWIFT 45 since it has a bad gyroscope 
                                  Removed microSWIFT 58 since it has a bad gyroscope
-
+                                 microSWIFT_33 is masked from the start to index 500 due to a large spike in the data.
+                                 Removed microSWIFT_30 due to consistently too large values of sea surface elevation. 
+                                 Removed microSWIFT_50 due to consistently too large values of sea surface elevation. 
+                                 
 Mission 73(Cleaned on 02/14/22): Adjusted start time from 2021-10-28T19:10:00 to 2021-10-28T19:11:00 since most microSWIFTs were not in the water yet as seen by a spike in acceleration signals
                                  Adjusted end time from 2021-10-28T19:30:00 to 2021-10-28T19:21:00 since all microSWIFTs have reached the beach at this point as shown by the spatial mask
                                  Removed microSWIFT 58 since it has a bad gyro
                                  Note microSWIFT 50 has a bad magnetometer
                                 
 Mission 74(Cleaned on 02/14/22): Adjusted start time from 2021-10-29T12:12:00 to 2021-10-29T12:13:30 since most microSWIFTs were not in the water yet as seen by a spike in acceleration signals
-                                 Adjsuted end time from 2021-10-29T12:40:00 to 2021-10-29T12:23:00 since most microSWIFTs had made it to the beach by this point
+                                 Adjusted end time from 2021-10-29T12:40:00 to 2021-10-29T12:23:00 since most microSWIFTs had made it to the beach by this point
                                  Removed microSWIFT 58 since it has a bad gyroscope
                                  Removed microSWIFT 50 since it has a bad gyroscope
-                                 Mask microSWIFT 12 from index 3500 to the end since it had a few points that were not succesfully cut off by the spatial mask most likely due to the microSWIFT rolling back down the beach briefly
-                                 Mask microSWIFT 62 from index 4500 to the end since it had a few points that were not succesfully cut off by the spatial mask most likely due to the microSWIFT rolling back down the beach briefly
+                                 Mask microSWIFT 12 from index 3500 to the end since it had a few points that were not successfully cut off by the spatial mask most likely due to the microSWIFT rolling back down the beach briefly
+                                 Mask microSWIFT 62 from index 4500 to the end since it had a few points that were not successfully cut off by the spatial mask most likely due to the microSWIFT rolling back down the beach briefly
                                  
 Mission 75(Cleaned on 02/14/22): Adjusted start time from 2021-10-29T13:02:00 to 2021-10-29T13:03:00 since a few of the microSWIFTs had not yet been deplyed as seen by lare spikes in accelerations at the start of the record
                                  Adjusted end time from 2021-10-29T13:20:00 to 2021-10-29T13:09:00 since all the microSWIFTs had made it to the beach at this point
@@ -505,15 +537,16 @@ Mission 75(Cleaned on 02/14/22): Adjusted start time from 2021-10-29T13:02:00 to
                                  Removed microSWIFT 58 since it has a bad gyroscope
 
 Mission 76(Cleaned on 02/14/22): Adjusted start time from 2021-10-29T13:28:00 to 2021-10-29T13:29:00 since a few microSWIFTs were not quite in the water yet as seen by spikes in acceleration signals
-                                 Adjusted end time from 2021-10-29T13:44:00 to 2021-10-29T13:37:00 since almost all microSWIFTs had made it to the beach at this point
-                                 Masked microSWIFT 54 from start to index 2000 since a few points werent correctly masked at this time 
+                                 Adjusted end time from 2021-10-29T13:44:00 to 2021-10-29T13:35:00 since almost all microSWIFTs had made it to the beach at this point
+                                 Masked microSWIFT 54 from start to index 2000 since a few points weren't correctly masked at this time 
                                  Removed microSWIFT 18 since it has almost no data during this mission
                                  Masked microSWIFT 60 from index 2000 to the end since it had landed on the beach already
-                                 Masked microSWIFT 35 from index 4000 to end since a few points were not cut off correcly from spatial mask
                                  Removed microSWIFT 50 since it has a bad gyroscope
                                  Removed microSWIFT 58 since it has a bad gyroscope
                                  Removed microSWIFT 48 since it is missing GPS data
                                  Removed microSWIFT 26 since it is missing GPS data
+                                 microSWIFT_38 masked from index 2500 to the end since it reached the beach and then rolled back into the water.
+                                 Removed microSWIFT_35 since it did not have enough data, leading to spiky results.
 
 Mission 77(Cleaned on 02/15/22): Adjusted start time from 2021-10-29T14:02:00 to 2021-10-29T14:02:45 since a few of the microSWIFTs were not quite in the water as shown by a spike in acceleration data at the beginning of the record
                                  Adjusted end time from 2021-10-29T14:18:00 to 2021-10-29T14:08:15 since almost all the microSWIFTs made it to the beach by this point as seen by the spatial mask
