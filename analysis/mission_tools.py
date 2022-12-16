@@ -217,22 +217,32 @@ def plot_wave_height_dist(wave_heights, num_bins):
 
     return ax
 
-def compute_sig_wave_height_var(wave_heights):
+def compute_sig_wave_height_var(eta, single_trajectory=False):
     """
-    Compute Significant Wave Height, Hs from distribution of wave
-    heights.
+    Compute Significant Wave Height, Hs from time series of sea surface
+    elevation.
 
     Parameters
     ----------
-    wave_heights : list
-        List of wave heights
+    eta : np.ndarray
+        2D array of sea surface elevation
+    single_trajectory : boolean
+        True or False if this is a single trajectory
 
     Returns
     -------
     sig_wave_height : float
         significant wave height
     """
-    sig_wave_height = 4 * np.sqrt(np.var(wave_heights))
+    if single_trajectory is True:
+        eta = eta.reshape(1,eta.size)
+    else:
+        pass
+
+    # compute varaince for each trajectory and average across each traj
+    variance_on_each_trajectory = np.nanvar(eta, axis=1)
+    average_variance = np.mean(variance_on_each_trajectory)
+    sig_wave_height = 4 * np.sqrt(average_variance)
 
     return sig_wave_height
 
@@ -261,6 +271,53 @@ def compute_sig_wave_height_top_third(wave_heights):
     sig_wave_height = np.mean(top_third_waves)
 
     return sig_wave_height
+
+def compute_sig_wave_height_rms(wave_heights):
+    """
+    Compute Significant Wave Height, Hs from distribution of wave
+    heights.
+
+    Parameters
+    ----------
+    wave_heights : list
+        List of wave heights
+
+    Returns
+    -------
+    sig_wave_height : float
+        significant wave height
+    """
+     # Sort wave heights
+    h_rms = np.sqrt(np.mean(np.square(wave_heights)))
+    sig_wave_height = 1.416 * h_rms
+
+    return sig_wave_height
+
+
+def closest_awac_sig_wave_height(mission_time, awac_file):
+    """
+    Find the closest AWAC significant wave height
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the awac
+    awac_file : str
+        path or url to the awac file
+
+    Returns
+    -------
+    awac_sig_wave_height : float
+        significant wave height
+    """
+    awac_data = nc.Dataset(awac_file)
+
+    awac_sig_wave_height = np.interp(mission_time,
+                        awac_data['time'][:],
+                        awac_data['waveHs'][:])
+
+    awac_data.close()
+    return awac_sig_wave_height
 
 def compute_wave_bathy(x_locs, y_locs, bathy_file):
     """
