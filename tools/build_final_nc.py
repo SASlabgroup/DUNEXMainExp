@@ -466,20 +466,7 @@ def mission_metadata(rootgrp, mission_num):
     rootgrp.mission_start_time = dunex_xlsx['Start Time'].iloc[mission_num]
     rootgrp.mission_end_time = dunex_xlsx['End Time'].iloc[mission_num]
     rootgrp.deployment_notes = dunex_xlsx['Deployment Notes'].iloc[mission_num]
-
-    # Get data cleaning notes
-    # dunex_df = pd.read_excel('../DUNEXMainExp_notes.xlsx', 'microSWIFT Masks')
-    # dunex_df['Mission Number'] = pd.Series(dunex_df['Mission Number']).fillna(method='ffill')
-    # mission_masks = dunex_df[dunex_df['Mission Number'] == mission_num]
-    # cleaning_notes = list(mission_masks[mission_masks['Mission Number'] == mission_num]['Notes'])
-    # total_notes = ''
-    # for note in cleaning_notes:
-    #     if isinstance(note, str):
-    #         total_notes += note
-    #         total_notes += ' '
-    #     else:
-    #         continue
-    # rootgrp.data_cleaning_notes = total_notes
+    rootgrp.data_cleaning_notes = dunex_xlsx['Data Cleaning Notes'].iloc[mission_num]
 
 def save_var_in_final_style(var_name,
                             nc_var,

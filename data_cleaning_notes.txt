@@ -34,7 +34,7 @@ Mission 5(Cleaned on 03/01/22): Adjusted the start time from 2021-10-05T18:35:00
                                 Removed microSWIFT 41 since it had unreasonably high sea surface elevations (~ 5 meters) most likely due to a short record(~2500 points)
                                 Removed microSWIFT 57 since it had a huge spike in acceleration and value of sea surface elevation of ~300 meters due to potentially a malfunction in the accelerometer or gyroscope 
 
-Mission 6(Cleaned on 02/25/22): Not a separate mission from mission 1 but these are the microSWIFTS that drifted super far north - removed from the cleaned dataset since it is not useful data for this project - all buoys are far from test site and in deep/
+Mission 6(Cleaned on 02/25/22): Not a separate mission from mission 1 but these are the microSWIFTs that drifted super far north - removed from the cleaned dataset since it is not useful data for this project - all buoys are far from the test site and in deep/
 			       intermediate water
 
 Mission 7(Cleaned on 02/25/22): Masked microSWIFT 40 from index 36000 to the end since it reached the beach in the send window so we are masking from the start of the send window to the end
