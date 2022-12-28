@@ -7,9 +7,11 @@ import netCDF4 as nc
 import numpy as np
 from PyAstronomy import pyaC
 from scipy import interpolate
+from scipy import signal
 from scipy import stats
 
-def plot_mission_tracks(mission_dataset, bathy_file):
+def plot_mission_tracks(mission_dataset, bathy_file, trajectory_subset=None,
+                        time_ind_subset=None):
     """
     Plot all tracks from the mission over the bathymetry of the FRF
 
@@ -19,6 +21,10 @@ def plot_mission_tracks(mission_dataset, bathy_file):
         The dataset object for the mission from a netCDF file
     bathy_file : str
         Path or url to the bathymetry file
+    trajectory_subset : list
+        A list of trajectory indices that you want to plot.
+    trajectory_subset : np.ndarray
+        An array of time indices that you want to plot.
     """
     fig, ax = plt.subplots(figsize=(8,8))
 
@@ -34,12 +40,50 @@ def plot_mission_tracks(mission_dataset, bathy_file):
     # ax.clabel(cs, levels=[-2,-4,-6], inline=True, fontsize=16, colors='k')
 
     # Plot the drift tracks of each microSWIFT on the mission
-    x_locations = mission_dataset['xFRF']
-    y_locations = mission_dataset['yFRF']
-    time_vals = mission_dataset['time'][:]
-    for n in range(mission_dataset['trajectory'].size):
-        map = ax.scatter(x_locations[n,:], y_locations[n,:],
-                         c=time_vals, cmap='plasma')
+    if trajectory_subset is None and time_ind_subset is None:
+        x_locations = mission_dataset['xFRF']
+        y_locations = mission_dataset['yFRF']
+        time_vals = mission_dataset['time'][:]
+        for n in range(mission_dataset['trajectory'].size):
+            map = ax.scatter(x_locations[n,:], y_locations[n,:],
+                            c=time_vals, cmap='plasma')
+
+    elif trajectory_subset is not None and time_ind_subset is None:
+        x_locations = mission_dataset['xFRF']
+        y_locations = mission_dataset['yFRF']
+        time_vals = mission_dataset['time'][:]
+        for n in range(mission_dataset['trajectory'].size):
+            if n in trajectory_subset:
+                map = ax.scatter(x_locations[n,:], y_locations[n,:],
+                            c=time_vals, cmap='plasma')
+            else:
+                pass
+
+    if trajectory_subset is None and time_ind_subset is not None:
+        x_locations = mission_dataset['xFRF']
+        y_locations = mission_dataset['yFRF']
+        time_vals = mission_dataset['time'][:]
+        time_ind_index = 0
+        for n in range(mission_dataset['trajectory'].size):
+            map = ax.scatter(x_locations[n,time_ind_subset[time_ind_index]],
+                                y_locations[n,time_ind_subset[time_ind_index]],
+                                c=time_vals[time_ind_index], cmap='plasma')
+            time_ind_index += 1
+
+    elif trajectory_subset is not None and time_ind_subset is not None:
+        x_locations = mission_dataset['xFRF']
+        y_locations = mission_dataset['yFRF']
+        time_vals = mission_dataset['time'][:]
+        time_ind_index = 0
+        for n in range(mission_dataset['trajectory'].size):
+            if n in trajectory_subset:
+                map = ax.scatter(x_locations[n,time_ind_subset[time_ind_index]],
+                                 y_locations[n,time_ind_subset[time_ind_index]],
+                                 c=time_vals[time_ind_subset[time_ind_index]],
+                                 cmap='plasma')
+                time_ind_index += 1
+            else:
+                pass
 
     # Setup the colorbar for the time axis
     map.set_clim([time_vals[0], time_vals[-1]])
@@ -53,6 +97,10 @@ def plot_mission_tracks(mission_dataset, bathy_file):
     cbar.ax.set_xlabel('Time [UTC]')
 
     # Figure properties
+    awac4p5m_location = [397.35, 890.98] # Converted from lat lon locations 
+                                         # published on FRF data portal
+    ax.scatter(awac4p5m_location[0],awac4p5m_location[1],
+               color='r', label='4.5 m AWAC')
     ax.set_aspect('equal')
     ax.set_xlabel('Cross Shore Location [meters]')
     ax.set_ylabel('Along Shore Location [meters]')
@@ -346,5 +394,128 @@ def compute_wave_bathy(x_locs, y_locs, bathy_file):
     # Depth of each wave
     wave_bathy = []
     for n in np.arange(len(x)):
-        depth.append(np.squeeze(bathy_f(x[n], y[n])).item())
-    return depth 
+        wave_bathy.append(np.squeeze(bathy_f(x[n], y[n])).item())
+    return wave_bathy
+
+def bathy_along_track(bathy_file:str, xFRF:np.ndarray, yFRF:np.ndarray,
+                      single_trajectory=False):
+    """
+    Linearly interpolates the bathymetry along the track of
+    the microSWIFT.
+
+    Parameters
+    ----------
+    bathy_file : str
+        url or path to bathy bathymetry file
+    xFRF : np.ndarray
+        1D or 2D array of microSWIFT xFRF locations
+    yFRF : np.ndarray
+        1D or 2D array of microSWIFT xFRF locations
+    single_trajectory : boolean
+        True or False if plotting a single trajectory
+
+    Returns
+    -------
+    bathy_along_track : np.ndarray
+        1D or 2D array of bottom elevation at each location along the track
+
+    """
+    if single_trajectory is True:
+        xFRF = xFRF.reshape(1,xFRF.size)
+        yFRF = yFRF.reshape(1,yFRF.size)
+    else:
+        pass
+    
+    # Create bathymetry interpolating function from 2D grid
+    bathy_dataset = nc.Dataset(bathy_file)
+    bathy_xFRF = bathy_dataset['xFRF'][:]
+    bathy_yFRF = bathy_dataset['yFRF'][:]
+    bathy = bathy_dataset['elevation'][0,:,:]
+    bathy_f = interpolate.interp2d(bathy_xFRF, bathy_yFRF, bathy)
+
+    bathy_along_track = np.empty(xFRF.shape)
+    for trajectory in range(xFRF.shape[0]):
+        for n in np.arange(xFRF.shape[1]):
+            bathy_along_track[trajectory, n] = np.squeeze(
+                                                bathy_f(xFRF[trajectory, n],
+                                                yFRF[trajectory, n]).item())
+
+    return np.array(bathy_along_track)
+
+def ind_in_depth(bathy_along_tracks, depth_min, depth_max,
+                 single_trajectory=False):
+    """
+    Return the indices that the depth along the track is between the
+    minimum and maximum values given.
+
+    Parameters
+    ----------
+    bathy_along_track : np.ndarray
+        Bathymetry along the tracks
+    depth_min : float
+        minimum depth you are interested in, minimum is the most
+        negative value
+    depth_max : float
+        maximum depth you are interested in, maximum is the most
+        positive value
+    single_trajectory : boolean
+        True or False if plotting a single trajectory
+
+    Returns
+    -------
+    in_depth_indices : list
+        list of largest arrays of indices in the depth range
+    """
+    if single_trajectory is True:
+        bathy_along_tracks = bathy_along_tracks.reshape(1,
+                                                       bathy_along_tracks.size)
+    else:
+        pass
+
+    in_depth_indices = []
+
+    for n in np.arange(bathy_along_tracks.shape[0]):
+        bathy = bathy_along_tracks[n,:]
+        inds_in_set = np.where((bathy > depth_min)
+                               & (bathy < depth_max))[0]
+
+        arrays = np.split(inds_in_set, np.where(np.diff(inds_in_set) != 1)[0]+1)
+        size = 0
+        ind_of_max = 0
+        for n in range(len(arrays)):
+            if len(arrays[n]) > size:
+                size = len(arrays[n])
+                ind_of_max = n
+
+        in_depth_indices.append(arrays[ind_of_max])
+
+    return in_depth_indices
+
+def compute_spectra(z:np.ndarray, fs:float):
+    """
+    Compute energy density spectrum from sea surface elevation
+    time series.
+
+    Parameters
+    ----------
+    z : np.ndarray
+        Array that contains time series you want to compute the energy
+        spectrum for.
+    fs : float
+        sampling frequency for the time series
+    """
+    nperseg = 3600 # Window size in points
+    overlap = 0.50
+    f_raw, E_raw = signal.welch(z, fs=fs, window='hann', nperseg=nperseg,
+                                noverlap=np.floor(nperseg*overlap))
+
+    # Band Average the Spectra
+    points_to_average = 5
+    num_sections = E_raw.size // points_to_average
+    f_chunks = np.array_split(f_raw, num_sections)
+    E_chunks = np.array_split(E_raw, num_sections)
+    f = np.array([np.mean(chunk) for chunk in f_chunks ])
+    E = np.array([np.mean(chunk) for chunk in E_chunks ])
+    dof = np.floor(points_to_average * (8/3) * (z.shape[0]/ (nperseg//2)))
+
+    return f, E, dof
