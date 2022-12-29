@@ -393,8 +393,8 @@ def compute_wave_bathy(x_locs, y_locs, bathy_file):
 
     # Depth of each wave
     wave_bathy = []
-    for n in np.arange(len(x)):
-        wave_bathy.append(np.squeeze(bathy_f(x[n], y[n])).item())
+    for n in np.arange(len(x_locs)):
+        wave_bathy.append(np.squeeze(bathy_f(x_locs[n], y_locs[n])).item())
     return wave_bathy
 
 def bathy_along_track(bathy_file:str, xFRF:np.ndarray, yFRF:np.ndarray,
