@@ -97,14 +97,17 @@ def plot_mission_tracks(mission_dataset, bathy_file, trajectory_subset=None,
     cbar.ax.set_xlabel('Time [UTC]')
 
     # Figure properties
-    awac4p5m_location = [397.35, 890.98] # Converted from lat lon locations 
+    awac4p5m_location = [397.35, 890.98] # Converted from lat lon locations
                                          # published on FRF data portal
     ax.scatter(awac4p5m_location[0],awac4p5m_location[1],
                color='r', label='4.5 m AWAC')
     ax.set_aspect('equal')
     ax.set_xlabel('Cross Shore Location [meters]')
     ax.set_ylabel('Along Shore Location [meters]')
-    ax.plot([50,591],[510,510], linewidth=2, color='r')
+    ax.plot([50,591],[510,510], linewidth=2, color='r', label='Pier')
+    ax.legend()
+    
+    return ax
 
 def plot_mission_eta(mission_dataset):
     """
@@ -125,6 +128,8 @@ def plot_mission_eta(mission_dataset):
     eta = mission_dataset['sea_surface_elevation']
     for n in range(mission_dataset['trajectory'].size):
         ax.plot(time, eta[n,:])
+
+    return ax
 
 def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
                              single_trajectory=False):
