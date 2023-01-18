@@ -132,7 +132,7 @@ def plot_mission_eta(mission_dataset):
     return ax
 
 def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
-                             single_trajectory=False):
+                             single_trajectory=False, time_step=1/12):
     """
     Compute a distribution of wave heights and their locations from
     Parameters
@@ -149,19 +149,24 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
         path or url to the bathymetry file
     single_trajectory : boolean
         Whether or not we are plotting a single trajectory
+    time_step : float
+        Value for the difference in time between two points
 
     Returns
     -------
     wave_heights : list
         List of each wave height on a mission
+    wave_periods : list
+        List of each wave period on a mission
     wave_x_locs : list
         List of each wave cross shore location
     wave_y_locs : list
         List of each wave along shore location
     """
 
-    # Iniialize the arrays to store the wave height and locations
+    # Initialize the arrays to store the wave height and locations
     wave_heights = []
+    wave_periods = []
     wave_x_locs = []
     wave_y_locs = []
 
@@ -181,10 +186,11 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
         for n in np.arange(np.size(wave_inds)-1):
             # Get 45 elevation heights in between each zero crossing index
             eta_in_wave = eta[trajectory, wave_inds[n]:wave_inds[n+1]]
+            time_in_wave = time_step / (wave_inds[n+1] - wave_inds[n])
             x_in_wave = x_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
             y_in_wave = y_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
 
-            # Set intital wave height to NaN, if there is a wave compute
+            # Set initial wave height to NaN, if there is a wave compute
             # the wave height and check if that overwrote the initial
             # NaN value, if it did then save the wave height and
             # locations
@@ -199,6 +205,7 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
                 wave_heights.append(wave_height)
                 wave_x_locs.append(np.mean(x_in_wave))
                 wave_y_locs.append(np.mean(y_in_wave))
+                wave_periods.append(time_in_wave)
             else:
                 pass
 
@@ -313,6 +320,8 @@ def compute_sig_wave_height_top_third(wave_heights):
     -------
     sig_wave_height : float
         significant wave height
+    standard_dev : float
+        standard deviation of wave heights
     """
      # Sort wave heights
     wave_height_sort = np.sort(wave_heights)
@@ -323,7 +332,9 @@ def compute_sig_wave_height_top_third(wave_heights):
     # Average Top 1/3rd of wave heights
     sig_wave_height = np.mean(top_third_waves)
 
-    return sig_wave_height
+    standard_dev = np.std(wave_heights)
+
+    return sig_wave_height, standard_dev
 
 def compute_sig_wave_height_rms(wave_heights):
     """
@@ -345,7 +356,6 @@ def compute_sig_wave_height_rms(wave_heights):
     sig_wave_height = 1.416 * h_rms
 
     return sig_wave_height
-
 
 def closest_awac_sig_wave_height(mission_time, awac_file):
     """
