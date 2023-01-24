@@ -186,7 +186,7 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
         for n in np.arange(np.size(wave_inds)-1):
             # Get 45 elevation heights in between each zero crossing index
             eta_in_wave = eta[trajectory, wave_inds[n]:wave_inds[n+1]]
-            time_in_wave = time_step / (wave_inds[n+1] - wave_inds[n])
+            time_in_wave = (wave_inds[n+1] - wave_inds[n]) * time_step
             x_in_wave = x_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
             y_in_wave = y_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
 
@@ -209,7 +209,7 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
             else:
                 pass
 
-    return wave_heights, wave_x_locs, wave_y_locs
+    return wave_heights, wave_x_locs, wave_y_locs, wave_periods
 
 def plot_wave_locations(wave_x_locs, wave_y_locs, bathy_file, color):
     """
@@ -332,7 +332,7 @@ def compute_sig_wave_height_top_third(wave_heights):
     # Average Top 1/3rd of wave heights
     sig_wave_height = np.mean(top_third_waves)
 
-    standard_dev = np.std(wave_heights)
+    standard_dev = np.std(top_third_waves)
 
     return sig_wave_height, standard_dev
 
@@ -381,6 +381,38 @@ def closest_awac_sig_wave_height(mission_time, awac_file):
 
     awac_data.close()
     return awac_sig_wave_height
+
+def closest_awac_spectra(mission_time, awac_file):
+    """
+    Find the closest AWAC spectrum
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the awac
+    awac_file : str
+        path or url to the awac file
+
+    Returns
+    -------
+    awac_spectra : np.ndarray
+        energy density spectrum
+    awac_freq : np.ndarray
+        frequencies associated with the spectrum
+    """
+    awac_data = nc.Dataset(awac_file)
+
+    awac_freq = awac_data['waveFrequency'][:]
+
+    awac_spectra = np.empty(awac_data['waveEnergyDensity'][:].shape[1])
+    
+    for n in range(awac_spectra.size):
+        awac_spectra[n] = np.interp(mission_time,
+                                    awac_data['time'][:],
+                                    awac_data['waveEnergyDensity'][:,n])
+
+    awac_data.close()
+    return awac_spectra, awac_freq
 
 def compute_wave_bathy(x_locs, y_locs, bathy_file):
     """
