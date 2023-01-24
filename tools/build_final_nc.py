@@ -45,6 +45,15 @@ def build_final_nc(mission_num):
 
     # Set overall file information
     rootgrp.title = f'DUNEX microSWIFT drifter - Mission {mission_num}'
+    rootgrp.summary = 'University of Washington - Applied Physics Lab team '\
+                      'collected these data using microSWIFT wave buoys at ' \
+                      'the USACE Field Research Facility as part of the USCRP '\
+                      'funded project DUNEX (During Nearshore Events Experiment). '\
+                      'The file contains both directly measured and computed ' \
+                      'quantities from the drifting wave buoys. The collection ' \
+                      'and processing of these data is explained in the github '\
+                      'repository at https://github.com/SASlabgroup/DUNEXMainExp '\
+                      'along with examples of how these data can be used.'
     rootgrp.institution = 'University of Washington - Applied Physics Lab'
     rootgrp.source = 'Observations from microSWIFT drifters deployed ' \
                      'in the DUring Nearshore Events eXperiment (DUNEX)'
@@ -67,6 +76,27 @@ def build_final_nc(mission_num):
     rootgrp.history = str(datetime.datetime.utcnow()) + ' Python'
     rootgrp.references = 'https://github.com/SASlabgroup/microSWIFT and ' \
                          'https://github.com/SASlabgroup/DUNEXMainExp'
+    rootgrp.acknowledgement = 'These data were collected as part of the '\
+                              'During Nearshore Event Experiment (DUNEX), ' \
+                              'which was facilitated by the U.S. Coastal ' \
+                              'Research Program (USCRP). We thank USCRP for ' \
+                              'their support of this effort through funding ' \
+                              'for logistics and coordination. We also thank ' \
+                              'the U.S. Army Engineer Research and Development ' \
+                              'Center\'s Field Research Facility for the use ' \
+                              'of their facility and support staff. We would ' \
+                              'like to specifically thank Patrick Dickhudt, ' \
+                              'Mike Forte, Spicer Bak, the Town of Duck ' \
+                              'surf rescue, and many others at the field ' \
+                              'research facility for all the help they provided ' \
+                              'in collection and publication of these data.'
+
+    rootgrp.license = 'Data are intended for scholarly use by the research ' \
+                      'community, with the express agreement that users will ' \
+                      'properly acknowledge the U.S. Coastal Research Program ' \
+                      '(USCRP). Use or reproduction of these data for ' \
+                      'commercial purposes is prohibited without prior ' \
+                      'written permission.'
 
     # Set Mission Specific Metadata
     mission_metadata(rootgrp, mission_num)
