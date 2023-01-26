@@ -256,15 +256,15 @@ def main(mission_num=None):
                 mag_z_mission[imu_nans] = np.interp(mission_time_num[imu_nans], mission_time_num[~imu_nans], mag_z_mission[~imu_nans])
                 
                 # Despike the acceleration, gyroscope and magnetometer measurements
-                accel_x_despike = eng.filloutliers(matlab.double(accel_x_mission.tolist()), 'pchip', nargout=1)
-                accel_y_despike = eng.filloutliers(matlab.double(accel_y_mission.tolist()), 'pchip', nargout=1)
-                accel_z_despike = eng.filloutliers(matlab.double(accel_z_mission.tolist()), 'pchip', nargout=1)
-                gyro_x_despike = eng.filloutliers(matlab.double(gyro_x_mission.tolist()), 'pchip', nargout=1)
-                gyro_y_despike = eng.filloutliers(matlab.double(gyro_y_mission.tolist()), 'pchip', nargout=1)
-                gyro_z_despike = eng.filloutliers(matlab.double(gyro_z_mission.tolist()), 'pchip', nargout=1)
-                mag_x_despike = eng.filloutliers(matlab.double(mag_x_mission.tolist()), 'pchip', nargout=1)
-                mag_y_despike = eng.filloutliers(matlab.double(mag_y_mission.tolist()), 'pchip', nargout=1)
-                mag_z_despike = eng.filloutliers(matlab.double(mag_z_mission.tolist()), 'pchip', nargout=1)
+                accel_x_despike = eng.filloutliers(matlab.double(accel_x_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                accel_y_despike = eng.filloutliers(matlab.double(accel_y_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                accel_z_despike = eng.filloutliers(matlab.double(accel_z_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                gyro_x_despike = eng.filloutliers(matlab.double(gyro_x_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                gyro_y_despike = eng.filloutliers(matlab.double(gyro_y_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                gyro_z_despike = eng.filloutliers(matlab.double(gyro_z_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                mag_x_despike = eng.filloutliers(matlab.double(mag_x_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                mag_y_despike = eng.filloutliers(matlab.double(mag_y_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
+                mag_z_despike = eng.filloutliers(matlab.double(mag_z_mission.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)
 
                 # Use MATLAB AHRS filter function to correct the accelerations to the earth frame of reference 
                 accel_x_earth, accel_y_earth, accel_z_earth = eng.AHRSAccelCorrection(accel_x_despike, accel_y_despike, accel_z_despike, gyro_x_despike, gyro_y_despike, gyro_z_despike, mag_x_despike, mag_y_despike, mag_z_despike, nargout=3)
@@ -281,8 +281,8 @@ def main(mission_num=None):
                 vel_z_earth, z_earth = microSWIFTTools.computeEta(accel_z_earth)
 
                 # Despike vertical velocity and sea surface elevation 
-                vel_z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(vel_z_earth.tolist()), 'pchip', nargout=1)))
-                z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(z_earth.tolist()), 'pchip', nargout=1)))
+                vel_z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(vel_z_earth.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)))
+                z_earth = np.squeeze(np.array(eng.filloutliers(matlab.double(z_earth.tolist()), 'pchip', 'ThresholdFactor', 4, nargout=1)))
 
             # If there isn't any points within the mission - skip it
             else:
