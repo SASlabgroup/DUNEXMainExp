@@ -184,9 +184,8 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
 
         # Compute Wave Height from each set of indices
         for n in np.arange(np.size(wave_inds)-1):
-            # Get 45 elevation heights in between each zero crossing index
+            # Get elevation heights in between each zero crossing index
             eta_in_wave = eta[trajectory, wave_inds[n]:wave_inds[n+1]]
-            time_in_wave = (wave_inds[n+1] - wave_inds[n]) * time_step
             x_in_wave = x_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
             y_in_wave = y_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
 
@@ -205,11 +204,10 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
                 wave_heights.append(wave_height)
                 wave_x_locs.append(np.mean(x_in_wave))
                 wave_y_locs.append(np.mean(y_in_wave))
-                wave_periods.append(time_in_wave)
             else:
                 pass
 
-    return wave_heights, wave_x_locs, wave_y_locs, wave_periods
+    return wave_heights, wave_x_locs, wave_y_locs
 
 def plot_wave_locations(wave_x_locs, wave_y_locs, bathy_file, color):
     """
@@ -561,8 +559,12 @@ def compute_spectra(z:np.ndarray, fs:float):
     num_sections = E_raw.size // points_to_average
     f_chunks = np.array_split(f_raw, num_sections)
     E_chunks = np.array_split(E_raw, num_sections)
-    f = np.array([np.mean(chunk) for chunk in f_chunks ])
-    E = np.array([np.mean(chunk) for chunk in E_chunks ])
+    f_total = np.array([np.mean(chunk) for chunk in f_chunks ])
+    E_total = np.array([np.mean(chunk) for chunk in E_chunks ])
     dof = np.floor(points_to_average * (8/3) * (z.shape[0]/ (nperseg//2)))
+
+    inds_to_return = np.where((f_total > 0.02) & (f_total < 0.5))
+    f = f_total[inds_to_return]
+    E = E_total[inds_to_return]
 
     return f, E, dof
