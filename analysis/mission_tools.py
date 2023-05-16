@@ -166,7 +166,6 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
 
     # Initialize the arrays to store the wave height and locations
     wave_heights = []
-    wave_periods = []
     wave_x_locs = []
     wave_y_locs = []
 
