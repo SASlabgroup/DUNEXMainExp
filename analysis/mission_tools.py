@@ -354,6 +354,23 @@ def compute_sig_wave_height_rms(wave_heights):
 
     return sig_wave_height
 
+def compute_rms_wave_height(wave_heights):
+    """
+    Computes the root mean square wave height from the set of wave heights.
+
+    Parameters
+    ----------
+    wave_heights : list
+        List of wave heights
+
+    Returns
+    -------
+    rms_wave_height : float
+        root-mean-square wave height
+
+    """
+    return np.sqrt(np.mean(np.square(wave_heights)))
+
 def closest_awac_sig_wave_height(mission_time, awac_file):
     """
     Find the closest AWAC significant wave height
