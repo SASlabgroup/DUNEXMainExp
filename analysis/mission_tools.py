@@ -5,8 +5,10 @@ import cftime
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
+import math
 from PyAstronomy import pyaC
 from scipy import interpolate
+from scipy import optimize
 from scipy import signal
 from scipy import stats
 
@@ -396,6 +398,56 @@ def closest_awac_sig_wave_height(mission_time, awac_file):
     awac_data.close()
     return awac_sig_wave_height
 
+def closest_awac_Tm(mission_time, awac_file):
+    """
+    Find the closest AWAC mean period
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the awac
+    awac_file : str
+        path or url to the awac file
+
+    Returns
+    -------
+    awac_Tm : float
+        mean wave period
+    """
+    awac_data = nc.Dataset(awac_file)
+
+    awac_Tm = np.interp(mission_time,
+                        awac_data['time'][:],
+                        awac_data['waveTm'][:])
+
+    awac_data.close()
+    return awac_Tm
+
+def closest_awac_dir(mission_time, awac_file):
+    """
+    Find the closest AWAC mean direction
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the awac
+    awac_file : str
+        path or url to the awac file
+
+    Returns
+    -------
+    awac_dir : float
+        mean wave period
+    """
+    awac_data = nc.Dataset(awac_file)
+
+    awac_dir = np.interp(mission_time,
+                        awac_data['time'][:],
+                        awac_data['waveMeanDirection'][:])
+
+    awac_data.close()
+    return awac_dir
+
 def closest_awac_spectra(mission_time, awac_file):
     """
     Find the closest AWAC spectrum
@@ -584,3 +636,38 @@ def compute_spectra(z:np.ndarray, fs:float):
     E = E_total[inds_to_return]
 
     return f, E, dof
+
+def compute_group_speed(k, h):
+    """
+    Computes the group speed of a wave packet from a characteristic wavenumber and water depth
+
+    Parameters
+    ----------
+    k : float
+        characteristic wave number
+    h : float
+        water depth
+    """
+    G = (2 * k * h)/np.sinh(2 * k * h)
+    c_g = np.tanh(k * h) * (1 + G)
+    return c_g
+
+def solve_dispersion_relation(g, h, omega):
+    """Solve the linear water wave dispersion relation for the given parameters and frequency.
+
+    Args:
+        g (float): Acceleration due to gravity.
+        h (float): Water depth.
+        omega (float): Angular frequency.
+
+    Returns:
+        float: The wavenumber that satisfies the dispersion relation.
+    """
+
+    def f(k):
+        return omega**2 - g * k * math.tanh(k * h)
+
+    k_guess = omega**2 / g # use the deep water approximation as an initial guess for k
+    k = optimize.newton(f, k_guess) # use Newton's method to solve for k
+
+    return k
