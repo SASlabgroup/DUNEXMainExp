@@ -210,6 +210,87 @@ def compute_individual_waves(x_locations, y_locations, eta, time, bathy_file,
 
     return wave_heights, wave_x_locs, wave_y_locs
 
+def compute_individual_waves_with_time(x_locations, y_locations, eta, time,
+                             time_units='seconds since 1970-01-01 00:00:00',
+                             time_calendar='gregorian',
+                             single_trajectory=False):
+    """
+    Compute a distribution of wave heights and their locations from
+    Parameters
+    ----------
+    x_locations : np.ndarray
+        Array of cross shore locations of microSWIFT
+    y_locations : np.ndarray
+        Array of along shore locations of microSWIFT
+    eta : np.ndarray
+        Array of sea surface elevation of microSWIFT
+    time : np.ndaray
+        Array of time values - not datetime values
+    single_trajectory : boolean
+        Whether or not we are plotting a single trajectory
+
+    Returns
+    -------
+    wave_heights : list
+        List of each wave height on a mission
+    wave_periods : list
+        List of each wave period on a mission
+    wave_x_locs : list
+        List of each wave cross shore location
+    wave_y_locs : list
+        List of each wave along shore location
+    """
+
+    # Initialize the arrays to store the wave height and locations
+    wave_heights = []
+    wave_times = []
+    wave_x_locs = []
+    wave_y_locs = []
+
+    if single_trajectory is True:
+        eta = eta.reshape(1,eta.size)
+        x_locations = x_locations.reshape(1,x_locations.size)
+        y_locations= y_locations.reshape(1,y_locations.size)
+    else:
+        pass
+
+    for trajectory in range(eta.shape[0]):
+        cross_time, cross_ind = pyaC.zerocross1d(time, eta[trajectory,:],
+                                                getIndices=True)
+        wave_inds = cross_ind[::2]
+
+        # Compute Wave Height from each set of indices
+        for n in np.arange(np.size(wave_inds)-1):
+            # Get elevation heights in between each zero crossing index
+            eta_in_wave = eta[trajectory, wave_inds[n]:wave_inds[n+1]]
+            x_in_wave = x_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
+            y_in_wave = y_locations[trajectory, wave_inds[n]:wave_inds[n+1]]
+            median_wave_time = np.median(time[wave_inds[n]:wave_inds[n+1]])
+            # median_wave_time = cftime.num2pydate(np.median(time[wave_inds[n]:wave_inds[n+1]]),
+            #                         units=time_units,
+            #                         calendar=time_calendar)
+
+            # Set initial wave height to NaN, if there is a wave compute
+            # the wave height and check if that overwrote the initial
+            # NaN value, if it did then save the wave height and
+            # locations
+            wave_height = np.NaN
+            if np.size(eta_in_wave) > 0:
+                # Add the compute wave height
+                wave_height = np.max(eta_in_wave) - np.min(eta_in_wave)
+            else:
+                pass
+
+            if ~np.isnan(wave_height):
+                wave_heights.append(wave_height)
+                wave_x_locs.append(np.mean(x_in_wave))
+                wave_y_locs.append(np.mean(y_in_wave))
+                wave_times.append(median_wave_time)
+            else:
+                pass
+
+    return wave_heights, wave_x_locs, wave_y_locs, wave_times
+
 def plot_wave_locations(wave_x_locs, wave_y_locs, bathy_file, color):
     """
     Plot the location of the individual waves from the mission
@@ -418,7 +499,7 @@ def closest_awac_Tm(mission_time, awac_file):
 
     awac_Tm = np.interp(mission_time,
                         awac_data['time'][:],
-                        awac_data['waveTm'][:])
+                        awac_data['waveTm1'][:])
 
     awac_data.close()
     return awac_Tm
@@ -479,6 +560,87 @@ def closest_awac_spectra(mission_time, awac_file):
 
     awac_data.close()
     return awac_spectra, awac_freq
+
+def closest_awac_dir_spectra(mission_time, awac_file):
+    """
+    Find the closest AWAC spectrum
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the awac
+    awac_file : str
+        path or url to the awac file
+
+    Returns
+    -------
+    awac_spectra : np.ndarray
+        energy density spectrum
+    awac_freq : np.ndarray
+        frequencies associated with the spectrum
+    """
+    awac_data = nc.Dataset(awac_file)
+
+    closest_ind = np.argmin(np.abs(awac_data['time'][:] - mission_time))
+
+    awac_freq = awac_data['waveFrequency'][:]
+    dirs = awac_data['waveDirectionBins'][:]
+    awac_spectra = awac_data['directionalWaveEnergyDensity'][closest_ind,:,:]
+
+    awac_data.close()
+    return awac_spectra, awac_freq, dirs
+
+def closest_wind_spd_and_dir(mission_time, wind_file):
+    """
+    Find the closest AWAC mean period
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the wind file
+    wind_file : str
+        path or url to the wind file
+
+    Returns
+    -------
+    wind_spd : float
+        wind speed, m/s
+
+    wind_dir : float
+        wind direction, deg
+    """
+    wind_data = nc.Dataset(wind_file)
+    closest_ind = np.argmin(np.abs(wind_data['time'][:] - mission_time))
+
+    wind_spd = wind_data['windSpeed'][closest_ind]
+    wind_dir = wind_data['windDirection'][closest_ind]
+
+    wind_data.close()
+    return wind_spd, wind_dir
+
+def closest_waterlevel(mission_time, water_level_file):
+    """
+    Find the closest water level from noaa tide gauge
+
+    Parameters
+    ----------
+    mission_time : float
+        time of the mission you are comparing to the wind file
+    water_level_file : str
+        path or url to the waterlevel file
+
+    Returns
+    -------
+    water_level : float
+        water level 
+    """
+    water_level_data = nc.Dataset(water_level_file)
+    closest_ind = np.argmin(np.abs(water_level_data['time'][:] - mission_time))
+
+    water_level = water_level_data['waterLevel'][closest_ind]
+
+    water_level_data.close()
+    return water_level
 
 def compute_wave_bathy(x_locs, y_locs, bathy_file):
     """
